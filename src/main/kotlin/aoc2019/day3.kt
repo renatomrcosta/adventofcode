@@ -55,13 +55,16 @@ data class Path(val direction: PathDirection, val stepAmount: Int)
 class Grid(
     private val paths: List<List<Path>>
 ) {
-    private val state: GridState by lazy {
-        initState()
-    }
-    val manhattanDistance: Int by lazy {
+    private val state: GridState by lazy { initState() }
+
+    init {
         doTraversal()
+    }
+
+    val manhattanDistance: Int by lazy {
         processManhattanDistance()
     }
+    val traversalSteps: Int by lazy { processTraversalSteps() }
 
     private fun initState(): GridState = GridState(
         wires = mutableListOf<Wire>().apply {
@@ -81,8 +84,9 @@ class Grid(
     //Takes the intersection of the wires and checks the closest collision
     private fun processManhattanDistance(): Int {
         val intersections = intersectCoordinates()
-        return intersections.map { it.calculateManhattanDistances() }.minOrNull()
-            ?: error("no values found for manhattan distance")
+        val closestIntersection =
+            intersections.minByOrNull { it.calculateManhattanDistances() } ?: error("no intersections found")
+        return closestIntersection.calculateManhattanDistances()
     }
 
     private fun intersectCoordinates(): Set<Coordinate> {
@@ -97,6 +101,12 @@ class Grid(
 
         return intersections
     }
+
+    private fun processTraversalSteps(): Int =
+        intersectCoordinates()
+            .map {
+                state.calculateMinimalTraversalWireToCoordinate(it)
+            }.minOrNull() ?: error("no min results found")
 }
 
 data class GridState(
@@ -114,6 +124,12 @@ data class GridState(
         //Debug information
         // println(wire.wireCoordinates)
     }
+
+    fun calculateMinimalTraversalWireToCoordinate(coordinate: Coordinate): Int =
+        wires.map {
+            val index = it.wireCoordinates.indexOf(coordinate)
+            index
+        }.sum()
 
     companion object {
         private val INITIAL_COORDINATE = Coordinate(0, 0)
@@ -203,14 +219,21 @@ fun main() {
 
     Grid(tst1).run {
         println("TST1 = ${this.manhattanDistance}")
+        println("TST1 = ${this.traversalSteps}")
     }
     Grid(tst2).run {
         println("TST2 = ${this.manhattanDistance}")
+        println("TST1 = ${this.traversalSteps}")
+
     }
     Grid(tst3).run {
         println("TST3 = ${this.manhattanDistance}")
+        println("TST1 = ${this.traversalSteps}")
+
     }
     Grid(resultInput).run {
         println("Result ${this.manhattanDistance}")
+        println("TST1 = ${this.traversalSteps}")
+
     }
 }
