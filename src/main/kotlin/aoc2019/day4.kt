@@ -1,7 +1,5 @@
 package aoc2019
 
-import kotlin.math.pow
-
 private val PUZZLE_INPUT_RANGE = (136818..685979)
 
 /*
@@ -19,7 +17,11 @@ fun main() {
 
     println(possiblePasswords.size)
 
-    // println(listOf(434567, 123456, 123434, 122345).map { it.hasAdjacentDigits() })
+    // println(listOf(434567, 123456, 123434, 122345).map { it.hasOnlyAdjacentPairs() })
+    // println(listOf(112233, 124444, 111122, 333354, 331321).map { it.hasAdjacentDigits() })
+    // println(listOf(111233, 123444, 111232, 343334, 999119).map { it.hasAdjacentDigits() })
+    // val test1 = 111232
+    // println(test1.hasAdjacentDigits())
 }
 
 private fun Int.neverDecreasesDigitsFromLeftToRight(): Boolean {
@@ -45,13 +47,29 @@ private fun Int.hasAdjacentDigits(): Boolean {
     if (!this.hasSixDigits()) error("Invalid input")
 
     val digits = this.extractDigits()
-    var previousDigit = digits[0]
-    for (i in 1 until 6) {
-        val currentDigit = digits[i]
-        if (currentDigit == previousDigit) return true
-        previousDigit = currentDigit
+
+    // As long as there's a group of 2 adjacent, the rest do not matter
+    val groupOfDigits = digits.groupInOrder()
+    return groupOfDigits.any { it.size == 2 }
+}
+
+private fun <T> List<T>.groupInOrder(): List<List<T>> {
+    val groupedItems = mutableListOf<MutableList<T>>()
+
+    var previousItem = this[0]
+    groupedItems.add(mutableListOf(previousItem)) // Initialize the list at index 0
+
+    for(index in 1 until this.size) {
+        val currentItem = this[index]
+        if(currentItem == previousItem) {
+            groupedItems.last().add(currentItem)
+        } else {
+            groupedItems.add(mutableListOf(currentItem))
+        }
+        previousItem = currentItem
     }
-    return false
+
+    return groupedItems.toList()
 }
 
 private fun Int.hasSixDigits(): Boolean =
