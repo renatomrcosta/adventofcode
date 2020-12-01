@@ -5,7 +5,7 @@ private const val DESIRED_SUM = 2020
 /*
     Find two entries in a list that sum up to a constant (2020). Then return their multiplied value
 */
-fun main() {
+fun main() = withExecutionTime {
     println("PART1 - TEST DATA")
     val testData = listOf(1721, 979, 366, 299, 675, 1456)
     findPairEqualToConstantOrNull(testData)?.let {
