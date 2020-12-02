@@ -13,7 +13,6 @@ private sealed class GenericPasswordPolicy {
     abstract val password: String
     abstract val letter: String
     abstract fun isPasswordValid(): Boolean
-
 }
 
 private data class TobogganPasswordPolicy(
@@ -23,7 +22,10 @@ private data class TobogganPasswordPolicy(
     val finalIndex: Int,
 ) : GenericPasswordPolicy() {
     override fun isPasswordValid(): Boolean {
-        TODO("Not yet implemented")
+        val initialLetter = password.getOrNull(initialIndex - 1)?.toString() ?: error("invalid initial index")
+        val finalLetter = password.getOrNull(finalIndex - 1)?.toString() ?: error("invalid final index")
+
+        return (initialLetter == letter) xor (finalLetter == letter)
     }
 }
 
@@ -42,24 +44,6 @@ private data class SledRentalPasswordPolicy(
         val targetLetterCount = letterCountMap[letter] ?: return false // letter not found in policy
         return targetLetterCount in minLetterOccurrences..maxLetterOccurrences
     }
-}
-
-fun part1() {
-    println("Part1 - Test Data")
-    testInputs
-        .map { it.mapToPasswordWithPolicy<SledRentalPasswordPolicy>() }
-        .filter { it.isPasswordValid() }
-        .run {
-            println("Total: ${this.size} | Valid passwords: $this")
-        }
-
-    println("Part1 - Real Data")
-    getInputFromFile()
-        .map { it.mapToPasswordWithPolicy<SledRentalPasswordPolicy>() }
-        .filter { it.isPasswordValid() }
-        .run {
-            println("Total: ${this.size} | Valid passwords: $this")
-        }
 }
 
 // Reads the test input from file as a list of strings
@@ -93,6 +77,43 @@ private inline fun <reified T : GenericPasswordPolicy> String.mapToPasswordWithP
     } as T
 }
 
+fun part1() {
+    println("Part1 - Test Data")
+    testInputs
+        .map { it.mapToPasswordWithPolicy<SledRentalPasswordPolicy>() }
+        .filter { it.isPasswordValid() }
+        .run {
+            println("Total: ${this.size} | Valid passwords: $this")
+        }
+
+    println("Part1 - Real Data")
+    getInputFromFile()
+        .map { it.mapToPasswordWithPolicy<SledRentalPasswordPolicy>() }
+        .filter { it.isPasswordValid() }
+        .run {
+            println("Total: ${this.size} | Valid passwords: $this")
+        }
+}
+
+fun part2() {
+    println("Part2 - Test Data")
+    testInputs
+        .map { it.mapToPasswordWithPolicy<TobogganPasswordPolicy>() }
+        .filter { it.isPasswordValid() }
+        .run {
+            println("Total: ${this.size} | Valid passwords: $this")
+        }
+
+    println("Part2 - Real Data")
+    getInputFromFile()
+        .map { it.mapToPasswordWithPolicy<TobogganPasswordPolicy>() }
+        .filter { it.isPasswordValid() }
+        .run {
+            println("Total: ${this.size} | Valid passwords: $this")
+        }
+}
+
 fun main() {
     part1()
+    part2()
 }
