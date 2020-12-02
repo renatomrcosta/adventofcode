@@ -54,7 +54,7 @@ private fun getInputFromFile(): List<String> =
 
 private val numberMatcherRegex = Regex("[0-9]+")
 
-// Maps a string of the input format to a policy object
+// Maps a string of the input format to a policy object, depending on the desired subtype of GenericPasswordPolicy
 private inline fun <reified T : GenericPasswordPolicy> String.mapToPasswordWithPolicy(): T {
     val (policyString, password) = this.split(":")
     val letter = policyString.last().toString()
