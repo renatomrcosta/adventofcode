@@ -15,10 +15,29 @@ val testData = listOf(
 )
 
 fun main() {
+    val fileInputData = getInputFromFile()
     println("Part1 - Test data")
-    countTraversal(testData)
+    countTraversal(testData, rightStep = 3)
     println("Part1 - Real data")
-    countTraversal(getInputFromFile())
+    countTraversal(fileInputData, rightStep = 3)
+
+    println("Part2 - Test data")
+    listOf(
+        countTraversal(testData, rightStep = 1),
+        countTraversal(testData, rightStep = 3),
+        countTraversal(testData, rightStep = 5),
+        countTraversal(testData, rightStep = 7),
+        countTraversal(testData, rightStep = 1, downStep = 2),
+    ).reduce { acc, i -> acc * i }.run { println("Multiplied value $this") }
+
+    println("part2 - Real data")
+    listOf(
+        countTraversal(fileInputData, rightStep = 1),
+        countTraversal(fileInputData, rightStep = 3),
+        countTraversal(fileInputData, rightStep = 5),
+        countTraversal(fileInputData, rightStep = 7),
+        countTraversal(fileInputData, rightStep = 1, downStep = 2),
+    ).reduce { acc, i -> acc * i }.run { println("Multiplied value $this") }
 }
 
 private fun getInputFromFile(): List<String> =
@@ -26,18 +45,20 @@ private fun getInputFromFile(): List<String> =
         .split("\n")
         .filter { it.isNotEmpty() }
 
-private fun countTraversal(traversalData: List<String>) {
+private fun countTraversal(traversalData: List<String>, rightStep: Int, downStep: Int = 1): Int {
     var xCoordinate = 0
-    var treeSquare = 0
+    var treeSquareCount = 0
 
-    traversalData.forEach { row ->
+    for (i in traversalData.indices step downStep) {
+        val row = traversalData[i]
         if (isPositionTree(row, xCoordinate)) {
-            treeSquare++
+            treeSquareCount++
         }
-        xCoordinate += 3
+        xCoordinate += rightStep
     }
 
-    println("Tree Squares = $treeSquare")
+    println("Tree Squares = $treeSquareCount")
+    return treeSquareCount
 }
 
 private fun isPositionTree(row: String, xCoordinate: Int): Boolean {
