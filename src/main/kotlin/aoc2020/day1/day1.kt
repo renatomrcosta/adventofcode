@@ -1,4 +1,7 @@
-package aoc2020
+package aoc2020.day1
+
+import aoc2020.readFile
+import aoc2020.withExecutionTime
 
 private const val DESIRED_SUM = 2020
 

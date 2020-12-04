@@ -1,4 +1,6 @@
-package aoc2020
+package aoc2020.day2
+
+import aoc2020.readFile
 
 // exemplifies the task at hand
 private val testInputs = listOf(
