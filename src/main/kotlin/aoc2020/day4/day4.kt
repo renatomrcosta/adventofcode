@@ -26,7 +26,6 @@ data class Document(val props: Map<String, String>) {
 
     companion object {
         private val requiredFields = listOf("byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid")
-        private val optionalFields = listOf("cid")
     }
 }
 
