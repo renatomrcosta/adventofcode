@@ -1,4 +1,6 @@
-package aoc2020
+package aoc2020.day3
+
+import aoc2020.readFile
 
 val testData = listOf(
     "..##.......",
