@@ -11,13 +11,28 @@ fun main() {
     println("Part 1 - Real Data")
     val inputList = getInputsFromFile()
 
-    // Get biggest ID
-    inputList
+    val seats = inputList
         .map { it.toSeat() }
         .sortedBy { it.id }
         .onEach { println(it) }
-        .maxByOrNull { it.id }
-        .run { println("Result - $this") }
+
+    // Part 1 - Get Biggest ID
+    println("PART 1 - biggest seat ID: ${seats.last()}")
+
+    println("PART 2 - Figure Out free seat")
+    seats
+        .groupBy { it.row }
+        .filter { it.value.count() in 4..7 } // find the column that will contain less items per row, but not totally empty
+        .entries.forEach { entryMap ->
+            val emptyColumnsInRow = (PLANE_COL_RANGE).mapNotNull { column ->
+                if (!entryMap.value.any { it.column == column }) {
+                    column
+                } else null
+            }
+            emptyColumnsInRow.map { emptyColumnsInRow ->
+                Seat(row = entryMap.key, column = emptyColumnsInRow)
+            }.forEach { println(it) }
+        }
 }
 
 private val PLANE_ROW_RANGE = 0..127
@@ -85,6 +100,4 @@ private data class Seat(val row: Int, val column: Int) {
         get() = (row * 8) + column
 
     override fun toString(): String = "Seat(row=$row, column=$column, id=$id)"
-
-
 }
