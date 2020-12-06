@@ -19,7 +19,7 @@ fun main() {
     println("Part2 - Test Data")
     parseInputPart2(testData).run {
         println("Test part 2 - $this")
-        val answerSum = sumOf { it.size  }
+        val answerSum = sumOf { it.size }
         println("Part2 test - Group Reply Count = $answerSum")
         assert(answerSum == 6)
     }
@@ -39,6 +39,7 @@ fun parseInput(input: String): List<Set<Char>> =
 
 fun parseInputPart2(input: String) = input.splitNewLines()
     .filter { it.isNotEmpty() }
+    .map { it.trim() }
     .map { it.split("\n") }
     .map { it.toSet() }
     .map { set ->
