@@ -29,8 +29,8 @@ fun main() {
                     column
                 } else null
             }
-            emptyColumnsInRow.map { emptyColumnsInRow ->
-                Seat(row = entryMap.key, column = emptyColumnsInRow)
+            emptyColumnsInRow.map { col ->
+                Seat(row = entryMap.key, column = col)
             }.forEach { println(it) }
         }
 }
