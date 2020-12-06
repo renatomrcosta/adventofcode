@@ -5,6 +5,7 @@ import aoc2020.splitNewLines
 import aoc2020.withExecutionTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -52,6 +53,7 @@ suspend fun parseInput(input: String): List<Set<Char>> =
     input
         .splitNewLines()
         .asFlow()
+        .buffer()
         .filter { it.isNotEmpty() }
         .map { it.replace("\n", "") }
         .map { it.toSet() }
@@ -60,6 +62,7 @@ suspend fun parseInput(input: String): List<Set<Char>> =
 suspend fun parseInputPart2(input: String): List<Set<Char>> =
     input.splitNewLines()
         .asFlow()
+        .buffer()
         .filter { it.isNotEmpty() }
         .map { it.trim() }
         .map { it.split("\n") }
