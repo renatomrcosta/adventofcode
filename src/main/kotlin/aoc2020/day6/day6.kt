@@ -41,7 +41,6 @@ fun parseInputPart2(input: String) = input.splitNewLines()
     .filter { it.isNotEmpty() }
     .map { it.trim() }
     .map { it.split("\n") }
-    .map { it.toSet() }
     .map { set ->
         set.map { it.toSet() }
             .reduce { acc, s ->
