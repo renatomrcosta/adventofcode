@@ -4,17 +4,26 @@ import aoc2020.readFile
 import java.util.concurrent.atomic.AtomicInteger
 
 fun main() {
+    // part1()
+    part2()
+}
+
+fun part2() {
+    println("Part2 - Test Data")
+}
+
+fun part1() {
     println("Part1 - Test Data")
     Computer(parseInput(testData)).run {
-        // val finalValue = operate()
-        // println("Final Value - $finalValue")
+        operate()
+        println("Final Value - $accumulator")
     }
 
     val input = readFile("day8.txt")
     println("Part1 - Real Data")
     Computer(parseInput(input)).run {
-        val finalValue = operate()
-        println("Final Value - $finalValue")
+        operate()
+        println("Final Value - $accumulator")
     }
 }
 
@@ -32,19 +41,18 @@ fun String.toInstruction(): Instruction {
 }
 
 data class Computer(val instructions: List<Instruction>) {
-    private val accumulator = AtomicInteger(0)
+    val accumulator = AtomicInteger(0)
     private val instructionIndex = AtomicInteger(0)
 
-    fun operate(): Int {
+    fun operate() {
         while (instructionIndex.get() <= instructions.lastIndex) {
             operate(instructions[instructionIndex.get()])
         }
-        return accumulator.get()
     }
 
     private fun operate(instruction: Instruction): Unit = with(instruction) {
         if (instruction.hasBeenExecuted) {
-            error("Instruction has executed before. Accumulator value $accumulator \n ${this@Computer}")
+            error("Instruction has executed before. Accumulator value $accumulator\n instruction: $instruction \n${this@Computer}")
         }
         when (operation) {
             "nop" -> {
