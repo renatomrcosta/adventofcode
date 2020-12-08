@@ -1,15 +1,59 @@
 package aoc2020.day8
 
 import aoc2020.readFile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.AtomicInteger
 
 fun main() {
-    // part1()
+    part1()
     part2()
 }
 
-fun part2() {
-    println("Part2 - Test Data")
+fun part2() = runBlocking(Dispatchers.Default) {
+    // Since we know that the premise is that only ONE change is necessary for solving the problem
+    // we can run async operations on each jmp / nop operations and see if any of them pan out at the end.
+    // We map errors to null and only come out with proper results.
+    println("Part2 - BRUTE FOOOORCE")
+    parseInput(readFile("day8.txt")).run {
+        this@run
+            .mapIndexed { index, instruction ->
+                async {
+                    try {
+                        when (instruction.operation) {
+                            "jmp" -> {
+                                val computer = Computer(createNewInstructionList(index, instruction))
+                                computer.operate()
+                                computer.accumulator
+                            }
+                            "nop" -> {
+                                val computer = Computer(createNewInstructionList(index, instruction))
+                                computer.operate()
+                                computer.accumulator
+                            }
+                            else -> null
+                        }
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+            }.mapNotNull { it.await() }
+            .forEach {
+                println("It ran successfully! Acc = $it")
+            }
+    }
+}
+
+private fun List<Instruction>.createNewInstructionList(
+    index: Int,
+    instruction: Instruction,
+): MutableList<Instruction> {
+    val newList = mutableListOf<Instruction>().apply { addAll(this.map { it.copy(hasBeenExecuted = false) }) }
+    val newOperation = if (instruction.operation == "nop") "jmp" else "nop"
+    newList[index] = instruction.copy(operation = newOperation)
+    return newList
 }
 
 fun part1() {
@@ -23,7 +67,7 @@ fun part1() {
     println("Part1 - Real Data")
     Computer(parseInput(input)).run {
         operate()
-        println("Final Value - $accumulator")
+        println("Final Va lue - $accumulator")
     }
 }
 
