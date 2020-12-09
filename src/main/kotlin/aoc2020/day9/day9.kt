@@ -14,7 +14,7 @@ fun part1() {
         println("Part2 - Test Data")
         findContiguousSum(this, outlier)
             .filter { it.size > 1 }
-            .map { getResult(it.sorted()) }
+            .map { getResult(it) }
             .forEach { println(it) }
 
     }
@@ -26,7 +26,7 @@ fun part1() {
         findContiguousSum(this, outlier)
             .filter { it.size > 1 }
             .also { println(it) }
-            .map { getResult(it.sorted()) }
+            .map { getResult(it) }
             .forEach { println(it) }
     }
 }
@@ -67,7 +67,11 @@ fun findContiguousSum(input: List<Long>, target: Long): List<List<Long>> {
     return results
 }
 
-fun getResult(contiguousSumList: List<Long>): Long = contiguousSumList.first() + contiguousSumList.last()
+fun getResult(contiguousSumList: List<Long>): Long {
+    val min = contiguousSumList.minOrNull() ?: error("something funky. No min value")
+    val max = contiguousSumList.maxOrNull() ?: error("something funky. No max value")
+    return min + max
+}
 
 fun parseInput(input: String): List<Long> =
     input.split("\n")
