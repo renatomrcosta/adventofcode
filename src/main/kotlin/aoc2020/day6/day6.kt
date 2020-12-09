@@ -1,7 +1,7 @@
 package aoc2020.day6
 
 import aoc2020.readFile
-import aoc2020.splitNewLines
+import aoc2020.splitOnBlankLines
 import aoc2020.withExecutionTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asFlow
@@ -51,7 +51,7 @@ fun main(): Unit = withExecutionTime {
 
 suspend fun parseInput(input: String): List<Set<Char>> =
     input
-        .splitNewLines()
+        .splitOnBlankLines()
         .asFlow()
         .buffer()
         .filter { it.isNotEmpty() }
@@ -60,7 +60,7 @@ suspend fun parseInput(input: String): List<Set<Char>> =
         .toList()
 
 suspend fun parseInputPart2(input: String): List<Set<Char>> =
-    input.splitNewLines()
+    input.splitOnBlankLines()
         .asFlow()
         .buffer()
         .filter { it.isNotEmpty() }
