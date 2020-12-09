@@ -10,12 +10,24 @@ fun main() {
 fun part1() {
     println("Part 1 - Test Data")
     parseInput(testData).run {
-        findOutlier(this, 5).also { println("Outlier is $it") }
+        val outlier = findOutlier(this, 5).also { println("Outlier is $it") }
+        println("Part2 - Test Data")
+        findContiguousSum(this, outlier)
+            .filter { it.size > 1 }
+            .map { getResult(it.sorted()) }
+            .forEach { println(it) }
+
     }
 
     println("Part 1 - Input Data")
     parseInput(readFile("day9.txt")).run {
-        findOutlier(this, 25).also { println("Outlier is $it") }
+        val outlier = findOutlier(this, 25).also { println("Outlier is $it") }
+        println("Part2 - Input Data")
+        findContiguousSum(this, outlier)
+            .filter { it.size > 1 }
+            .also { println(it) }
+            .map { getResult(it.sorted()) }
+            .forEach { println(it) }
     }
 }
 
@@ -35,6 +47,27 @@ fun hasSumInSlice(slice: List<Long>, target: Long): Boolean {
     }
     return false
 }
+
+fun findContiguousSum(input: List<Long>, target: Long): List<List<Long>> {
+    // Consider that more than one combination might exist?
+    val results = mutableListOf<List<Long>>()
+    for (index in input.indices - 1) {
+        input
+            .drop(index)
+            .runningFoldIndexed(0L) { foldIndex, acc, item ->
+                val sum = acc + item
+                if (sum == target) {
+                    results.add(input.subList(index, (foldIndex + index) + 1))
+                } else if (sum > target) {
+                    // Break the fold???
+                }
+                sum
+            }
+    }
+    return results
+}
+
+fun getResult(contiguousSumList: List<Long>): Long = contiguousSumList.first() + contiguousSumList.last()
 
 fun parseInput(input: String): List<Long> =
     input.split("\n")
