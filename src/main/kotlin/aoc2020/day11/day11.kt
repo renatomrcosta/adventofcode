@@ -1,22 +1,19 @@
 package aoc2020.day11
 
-import aoc2020.readFile
 import aoc2020.splitOnLineBreaks
+import aoc2020.withExecutionTime
 
 fun main() {
+
     testData.parseInput().run {
-        var rules = this
-        repeat(10) { iter ->
-            rules = applyRules(rules)
-            val count = rules.flatten().count { it == "#" }
-
-            println(rules)
-            println("ITer = $iter | Count: $count")
-
+        withExecutionTime {
+            runProcessing(this)
         }
     }
     // readFile("day11.txt").parseInput().run {
-    //     runProcessing(this)
+    //     withExecutionTime {
+    //         runProcessing(this)
+    //     }
     // }
 }
 
@@ -25,12 +22,19 @@ private fun runProcessing(input: List<MutableList<String>>) {
     val iterationCounterList = mutableListOf(0)
     do {
         rules = applyRules(rules)
+        prettyPrint(rules)
         val count = rules.flatten().count { it == "#" }
         iterationCounterList.add(count)
         val (first, last) = iterationCounterList.takeLast(2)
     } while (first != last)
     println(rules)
     println(iterationCounterList.last())
+}
+
+fun prettyPrint(rules: List<MutableList<String>>) {
+    println("--------")
+    rules.map { it.reduce { acc, s -> acc + s } }.forEach { println(it) }
+    println("--------")
 }
 
 fun applyRules(input: List<MutableList<String>>) =
@@ -62,9 +66,9 @@ fun countOccupiedRowSeats(
     // Define ranges
     val ranges = listOf(
         Triple("left", "cell", (cellIndex - 1 downTo 0)), // from cell go left in row
-        Triple("right", "cell", (cellIndex + 1 until rowSize)), // from cell to right in row
+        Triple("right", "cell", (cellIndex + 1 until cellSize)), // from cell to right in row
         Triple("up", "row", (rowIndex - 1 downTo 0)), // from row go up
-        Triple("down", "row", (rowIndex + 1 until cellSize)), // from row go down
+        Triple("down", "row", (rowIndex + 1 until rowSize)), // from row go down
     )
     // mix and match the other 4 directions
     val diagonals = listOf(
@@ -88,21 +92,22 @@ fun countOccupiedRowSeats(
     }
 
     for ((cellRange, rowRange) in diagonals) {
-        for(cellRangeIndex in cellRange) {
-            for(rowRangeIndex in rowRange) {
-                val item = input[rowRangeIndex][cellRangeIndex]
-                when (item) {
-                    "#" -> {
-                        counter++
-                        break
+        cellFor@ for (cellRangeIndex in cellRange) {
+            rowFor@ for (rowRangeIndex in rowRange) {
+                if (rowRangeIndex == cellRangeIndex) { // God I was lazy, and wanted this to be over. Forgive me
+                    val item = input[rowRangeIndex][cellRangeIndex]
+                    when (item) {
+                        "#" -> {
+                            counter++
+                            break@cellFor
+                        }
+                        "L" -> break@cellFor
+                        else -> break@rowFor
                     }
-                    "L" -> break
                 }
             }
         }
     }
-
-
 
     return counter
 }
