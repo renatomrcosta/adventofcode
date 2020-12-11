@@ -5,13 +5,19 @@ import aoc2020.splitOnLineBreaks
 
 fun main() {
     testData.parseInput().run {
-        runProcessing(this)
-    }
-    readFile("day11.txt").parseInput().run {
-        runProcessing(this)
-    }
+        var rules = this
+        repeat(10) { iter ->
+            rules = applyRules(rules)
+            val count = rules.flatten().count { it == "#" }
 
+            println(rules)
+            println("ITer = $iter | Count: $count")
 
+        }
+    }
+    // readFile("day11.txt").parseInput().run {
+    //     runProcessing(this)
+    // }
 }
 
 private fun runProcessing(input: List<MutableList<String>>) {
@@ -32,15 +38,74 @@ fun applyRules(input: List<MutableList<String>>) =
         row.mapIndexed { valueIndex, value ->
             if (value != ".") {
                 if (value == "L") {
-                    if (countOccupiedAdjacentSeats(valueIndex, rowIndex, input) == 0) "#"
+                    // if (countOccupiedAdjacentSeats(valueIndex, rowIndex, input) == 0) "#"
+                    if (countOccupiedRowSeats(valueIndex, rowIndex, input) == 0) "#"
                     else value
                 } else {
-                    if (countOccupiedAdjacentSeats(valueIndex, rowIndex, input) >= 4) "L"
+                    // if (countOccupiedAdjacentSeats(valueIndex, rowIndex, input) >= 4) "L"
+                    if (countOccupiedRowSeats(valueIndex, rowIndex, input) >= 5) "L"
                     else value
                 }
             } else value
         }.toMutableList()
     }
+
+fun countOccupiedRowSeats(
+    cellIndex: Int,
+    rowIndex: Int,
+    input: List<List<String>>,
+): Int {
+    val rowSize = input.size
+    val cellSize = input[0].size
+
+    var counter = 0
+    // Define ranges
+    val ranges = listOf(
+        Triple("left", "cell", (cellIndex - 1 downTo 0)), // from cell go left in row
+        Triple("right", "cell", (cellIndex + 1 until rowSize)), // from cell to right in row
+        Triple("up", "row", (rowIndex - 1 downTo 0)), // from row go up
+        Triple("down", "row", (rowIndex + 1 until cellSize)), // from row go down
+    )
+    // mix and match the other 4 directions
+    val diagonals = listOf(
+        ranges.first { it.first == "left" }.third to ranges.first { it.first == "up" }.third,
+        ranges.first { it.first == "left" }.third to ranges.first { it.first == "down" }.third,
+        ranges.first { it.first == "right" }.third to ranges.first { it.first == "up" }.third,
+        ranges.first { it.first == "right" }.third to ranges.first { it.first == "down" }.third,
+    )
+
+    for ((_, type, range) in ranges) {
+        for (i in range) {
+            val item = if (type == "cell") input[rowIndex][i] else input[i][cellIndex]
+            when (item) {
+                "#" -> {
+                    counter++
+                    break
+                }
+                "L" -> break
+            }
+        }
+    }
+
+    for ((cellRange, rowRange) in diagonals) {
+        for(cellRangeIndex in cellRange) {
+            for(rowRangeIndex in rowRange) {
+                val item = input[rowRangeIndex][cellRangeIndex]
+                when (item) {
+                    "#" -> {
+                        counter++
+                        break
+                    }
+                    "L" -> break
+                }
+            }
+        }
+    }
+
+
+
+    return counter
+}
 
 fun countOccupiedAdjacentSeats(
     cellIndex: Int,
