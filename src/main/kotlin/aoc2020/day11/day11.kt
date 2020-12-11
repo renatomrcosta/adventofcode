@@ -1,34 +1,34 @@
 package aoc2020.day11
 
+import aoc2020.readFile
 import aoc2020.splitOnLineBreaks
 import aoc2020.withExecutionTime
+import java.util.LinkedList
 
 fun main() {
-
     testData.parseInput().run {
         withExecutionTime {
             runProcessing(this)
         }
     }
-    // readFile("day11.txt").parseInput().run {
-    //     withExecutionTime {
-    //         runProcessing(this)
-    //     }
-    // }
+    readFile("day11.txt").parseInput().run {
+        withExecutionTime {
+            runProcessing(this)
+        }
+    }
 }
 
 private fun runProcessing(input: List<MutableList<String>>) {
     var rules = input
     val iterationCounterList = mutableListOf(0)
     do {
+        // prettyPrint(rules)
         rules = applyRules(rules)
-        prettyPrint(rules)
         val count = rules.flatten().count { it == "#" }
         iterationCounterList.add(count)
         val (first, last) = iterationCounterList.takeLast(2)
     } while (first != last)
-    println(rules)
-    println(iterationCounterList.last())
+    println("Occupied Seats ${iterationCounterList.last()}")
 }
 
 fun prettyPrint(rules: List<MutableList<String>>) {
@@ -40,17 +40,20 @@ fun prettyPrint(rules: List<MutableList<String>>) {
 fun applyRules(input: List<MutableList<String>>) =
     input.mapIndexed { rowIndex, row ->
         row.mapIndexed { valueIndex, value ->
-            if (value != ".") {
-                if (value == "L") {
+            when (value) {
+                "L" -> {
                     // if (countOccupiedAdjacentSeats(valueIndex, rowIndex, input) == 0) "#"
                     if (countOccupiedRowSeats(valueIndex, rowIndex, input) == 0) "#"
                     else value
-                } else {
+                }
+                "#" -> {
                     // if (countOccupiedAdjacentSeats(valueIndex, rowIndex, input) >= 4) "L"
                     if (countOccupiedRowSeats(valueIndex, rowIndex, input) >= 5) "L"
                     else value
                 }
-            } else value
+                "." -> value
+                else -> error("invalid input")
+            }
         }.toMutableList()
     }
 
@@ -72,10 +75,10 @@ fun countOccupiedRowSeats(
     )
     // mix and match the other 4 directions
     val diagonals = listOf(
-        ranges.first { it.first == "left" }.third to ranges.first { it.first == "up" }.third,
-        ranges.first { it.first == "left" }.third to ranges.first { it.first == "down" }.third,
-        ranges.first { it.first == "right" }.third to ranges.first { it.first == "up" }.third,
-        ranges.first { it.first == "right" }.third to ranges.first { it.first == "down" }.third,
+        ranges[0].third to ranges[3].third,
+        ranges[0].third to ranges[2].third,
+        ranges[1].third to ranges[3].third,
+        ranges[1].third to ranges[2].third,
     )
 
     for ((_, type, range) in ranges) {
@@ -92,19 +95,19 @@ fun countOccupiedRowSeats(
     }
 
     for ((cellRange, rowRange) in diagonals) {
-        cellFor@ for (cellRangeIndex in cellRange) {
-            rowFor@ for (rowRangeIndex in rowRange) {
-                if (rowRangeIndex == cellRangeIndex) { // God I was lazy, and wanted this to be over. Forgive me
-                    val item = input[rowRangeIndex][cellRangeIndex]
-                    when (item) {
-                        "#" -> {
-                            counter++
-                            break@cellFor
-                        }
-                        "L" -> break@cellFor
-                        else -> break@rowFor
-                    }
+        val cellIndices = LinkedList(cellRange.toList())
+        val rowIndices = LinkedList(rowRange.toList())
+
+        while (cellIndices.size != 0 && rowIndices.size != 0) {
+            val diagonalCellIndex = cellIndices.pop()
+            val diagonalRowIndex = rowIndices.pop()
+            val item = input[diagonalRowIndex][diagonalCellIndex]
+            when (item) {
+                "#" -> {
+                    counter++
+                    break
                 }
+                "L" -> break
             }
         }
     }
