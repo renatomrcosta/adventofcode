@@ -4,8 +4,24 @@ import aoc2020.readFile
 import aoc2020.splitOnLineBreaks
 
 fun main() {
-    part1()
+    // part1()
+    part2()
 }
+
+private fun part2() {
+    testData.parseInput().map { it.toLong() }.run {
+        mapPossibilities(this).also{ println(it)}
+
+    }
+}
+
+fun mapPossibilities(input: List<Long>): Map<Long, List<Long>> =
+    input.map { item ->
+        item to input.filterAcceptableJolts(item)
+    }.toMap()
+
+private fun List<Long>.filterAcceptableJolts(item: Long) =
+    this.filter { it in (item..item + 3) && it != item }
 
 private fun part1() {
     println("Part 1 - Test Data")
