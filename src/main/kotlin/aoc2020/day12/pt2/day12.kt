@@ -1,4 +1,4 @@
-package aoc2020.day12
+package aoc2020.day12.pt2
 
 import aoc2020.readFile
 import aoc2020.splitOnLineBreaks
@@ -23,16 +23,44 @@ fun main() {
 
 data class Ship(
     private var position: Position = initialPosition(),
-    private var direction: Direction = Direction.E,
+    private var waypoint: Position = initialWaypointPosition(),
 ) {
     init {
         logNewPosition()
     }
 
     fun navigate(command: Command) {
-        changeDirection(command)
-        moveBoat(command)
+        when (command.input) {
+            "F" -> moveBoat(command)
+            "N", "S", "E", "W" -> moveWaypoint(command)
+            "L", "R" -> rotateWaypoint(command)
+        }
         logNewPosition()
+    }
+
+    private fun rotateWaypoint(command: Command) {
+        val currentWaypoints = waypoint.filter { it.value != 0 }
+        waypoint.clear()
+        when (command.input) {
+            "L" -> {
+                currentWaypoints.forEach { (key, value) ->
+                    val destinationKey = key.left(command.distance)
+                    waypoint[destinationKey] = value
+                }
+            }
+            "R" -> {
+                currentWaypoints.forEach { (key, value) ->
+                    val destinationKey = key.right(command.distance)
+                    waypoint[destinationKey] = value
+                }
+            }
+            else -> error("invalid turn")
+        }
+    }
+
+    private fun moveWaypoint(command: Command) {
+        val direction = valueOfOrNull<Direction>(command.input) ?: error("Invalid Direction")
+        waypoint.merge(direction, command.distance) { x, y -> x + y }
     }
 
     fun calculateManhattanDistance(): Int =
@@ -40,24 +68,13 @@ data class Ship(
             (position[Direction.E]!! - position[Direction.W]!!).absoluteValue
 
     private fun moveBoat(command: Command) {
-        val direction = when (command.input) {
-            "N", "S", "W", "E" -> Direction.valueOf(command.input)
-            "L", "R" -> return
-            else -> this.direction
-        }
-        position.merge(direction, command.distance) { x, y -> x + y }
-    }
-
-    private fun changeDirection(command: Command) {
-        this.direction = when (command.input) {
-            "L" -> this.direction.left(command.distance)
-            "R" -> this.direction.right(command.distance)
-            else -> this.direction
+        waypoint.filter { it.value != 0 }.forEach { (key, value) ->
+            position.merge(key, value * command.distance) { x, y -> x + y }
         }
     }
 
     private fun logNewPosition() {
-        println("Direction $direction | position: $position")
+        println("Boat position: $position | Waypoint: $waypoint")
     }
 }
 
@@ -80,12 +97,7 @@ enum class Direction {
     }
 
     companion object {
-        private val traversal = mutableListOf<Direction>().apply {
-            add(E)
-            add(S)
-            add(W)
-            add(N)
-        }
+        private val traversal = listOf(E, S, W, N)
     }
 }
 typealias Position = MutableMap<Direction, Int>
@@ -93,6 +105,11 @@ typealias Position = MutableMap<Direction, Int>
 fun initialPosition() = mutableMapOf<Direction, Int>().apply {
     Direction.values().forEach { put(it, 0) }
 }
+
+fun initialWaypointPosition() = mutableMapOf(
+    Direction.E to 10,
+    Direction.N to 1,
+)
 
 inline fun <reified T : Enum<T>> valueOfOrNull(input: String): T? =
     enumValues<T>().find { it.name == input }
