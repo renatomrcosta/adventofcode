@@ -25,8 +25,6 @@ data class Ship(
     private var position: Position = initialPosition(),
     private var direction: Direction = Direction.E,
 ) {
-    private val positionLog = mutableListOf<Position>()
-
     init {
         logNewPosition()
     }
@@ -59,7 +57,7 @@ data class Ship(
     }
 
     private fun logNewPosition() {
-        positionLog.add(position)
+        println("Direction $direction | position: $position")
     }
 }
 
@@ -77,7 +75,7 @@ enum class Direction {
     fun left(distance: Int): Direction {
         val turns = distance / 90
 
-        val sequence = generateSequence { traversal }.flatten()
+        val sequence = generateSequence { traversal.reversed() }.flatten()
         return sequence.dropWhile { it != this }.take(turns + 1).last()
     }
 
