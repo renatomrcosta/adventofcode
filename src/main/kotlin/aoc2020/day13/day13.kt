@@ -3,8 +3,11 @@ package aoc2020.day13
 import aoc2020.readFile
 import aoc2020.splitOnLineBreaks
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.runBlocking
+import java.util.concurrent.Executors
 import kotlin.system.exitProcess
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
@@ -12,6 +15,7 @@ import kotlin.time.toDuration
 
 val startTime = System.currentTimeMillis()
 
+@ObsoleteCoroutinesApi
 @ExperimentalTime
 fun main() {
     testData.parseInput().let { (timestamp, busses) ->
@@ -28,14 +32,15 @@ fun main() {
     }
 }
 
+@ObsoleteCoroutinesApi
 @ExperimentalTime
 private fun part2(busses: List<Bus>, startValue: Long = 0L): Unit =
-    runBlocking(Dispatchers.IO) {
-        val start = if(startValue == 0L) busses[0].id else getStartIteration(startValue, busses[0].id)
+    runBlocking(newFixedThreadPoolContext(500, "mythreadpool")) {
+        val start = if (startValue == 0L) busses[0].id else getStartIteration(startValue, busses[0].id)
         for (iteration in (start..Long.MAX_VALUE) step busses[0].id) {
             launch {
                 if (isValidSequence(busses, iteration)) {
-                    println("Found ya: ${iteration + busses.last().offset}")
+                    println("Found ya: $iteration || With offset ${iteration + busses.last().offset}")
 
                     val duration = (System.currentTimeMillis() - startTime).toDuration(DurationUnit.MILLISECONDS)
                     println("Took me from startup: ${duration.inSeconds}")
@@ -48,8 +53,8 @@ private fun part2(busses: List<Bus>, startValue: Long = 0L): Unit =
     }
 
 fun getStartIteration(startValue: Long, id: Long): Long {
-    for(item in startValue..Long.MAX_VALUE) {
-        if(item % id == 0L)
+    for (item in startValue..Long.MAX_VALUE) {
+        if (item % id == 0L)
             return item
     }
     error("Not possible to start?")
