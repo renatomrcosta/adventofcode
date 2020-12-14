@@ -18,17 +18,17 @@ val startTime = System.currentTimeMillis()
 @ObsoleteCoroutinesApi
 @ExperimentalTime
 fun main() {
-    testData.parseInput().let { (timestamp, busses) ->
-        part1(timestamp, busses)
-        println("Running test data")
-        part2(busses)
-
-    }
+    // testData.parseInput().let { (timestamp, busses) ->
+    //     part1(timestamp, busses)
+    //     println("Running test data")
+    //     part2(busses)
+    //
+    // }
 
     readFile("day13.txt").parseInput().let { (timestamp, busses) ->
-        part1(timestamp, busses)
+        // part1(timestamp, busses)
         println("Running input data")
-        part2(busses, 100_000_000_000_000L)
+        part2(busses, 247086664214628)
     }
 }
 
