@@ -1,30 +1,33 @@
 package aoc2020.day15
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.runBlocking
 
 fun main() {
-    part1()
-}
-
-fun part1() = runBlocking {
-    Game(testData).play(2020).also { println(it.last()) }
-    Game(input).play(2020).also { println(it.last()) }
+    runBlocking {
+        // Game(testData).play(2020).also { println(it.last()) }
+        // Game(input).play(2020).also { println(it.last()) }
+        //
+        // Game(testData).play(30_000_000).also { println(it.last()) }
+        Game(input).play(30_000_000).also { println(it.last()) }
+    }
 }
 
 data class Game(val input: List<Int>) {
     private var inputTurnCount = input.size
-    private var numbers = mutableListOf(-10, *input.toTypedArray())
+    private var numbers = mutableListOf(*input.reversed().toTypedArray(), -10)
 
     private val flow = flow {
         while (true) {
-            val currentItem = numbers.last()
-            val itemIndex = numbers.dropLast(1).lastIndexOf(currentItem)
+            val currentItem = numbers.first()
+            val itemIndex = numbers.drop(1).indexOf(currentItem)
 
             if (itemIndex >= 0) {
-                emit(numbers.lastIndex - itemIndex)
+                emit(itemIndex + 1)
             } else {
                 emit(0)
             }
@@ -32,8 +35,14 @@ data class Game(val input: List<Int>) {
     }
 
     suspend fun play(turns: Int): List<Int> {
-        flow.take(turns - inputTurnCount).collect { numbers.add(it) }
-        return numbers
+        flow
+            .take(turns - inputTurnCount)
+            .collect {
+                numbers.add(0, it)
+                if (numbers.lastIndex % 100_000 == 0) println("${numbers.lastIndex} turns played")
+            }
+
+        return numbers.reversed()
     }
 }
 
