@@ -5,27 +5,27 @@ import aoc2020.splitOnBlankLines
 import aoc2020.splitOnLineBreaks
 
 fun main() {
-    // testData.toTicket().run {
-    // findAllFullyInvalidItemsInNearbyTickets().run {
-    //     println("Count: ${this.size} || Invalids: $this")
-    //     println("Sum of invalids: ${this.sum()}")
-    // }
-    // }
-    // readFile("day16.txt").toTicket().run {
-    //     findAllFullyInvalidItemsInNearbyTickets().run {
-    //         println("Count: ${this.size} || Invalids: $this")
-    //         println("Sum of invalids: ${this.sum()}")
-    //     }
-    // }
-
-    testData2.toTicket().cleanTicket().run {
-        val potentialIndices = mapConditionToIndices()
-        cleanIndicesUp(potentialIndices).also { println(it) }
+    testData.toTicket().run {
+        findAllFullyInvalidItemsInNearbyTickets().run {
+            println("Count: ${this.size} || Invalids: $this")
+            println("Sum of invalids: ${this.sum()}")
+        }
+    }
+    readFile("day16.txt").toTicket().run {
+        findAllFullyInvalidItemsInNearbyTickets().run {
+            println("Count: ${this.size} || Invalids: $this")
+            println("Sum of invalids: ${this.sum()}")
+        }
     }
 
-    readFile("day16.txt").toTicket().cleanTicket().run {
-        val potentialIndices = mapConditionToIndices()
-        val cleanedUpIndices = cleanIndicesUp(potentialIndices).also { println(it) }
+    testData2.toTicket().cloneTicketWithoutFullyInvalidNearbyTickets().run {
+        val potentialIndices = mapConditionToPotentialIndices()
+        mapConditionToOnlyPossibleIndex(potentialIndices).also { println(it) }
+    }
+
+    readFile("day16.txt").toTicket().cloneTicketWithoutFullyInvalidNearbyTickets().run {
+        val potentialIndices = mapConditionToPotentialIndices()
+        val cleanedUpIndices = mapConditionToOnlyPossibleIndex(potentialIndices).also { println(it) }
         val results = cleanedUpIndices
             .filter { it.key.startsWith("departure") }
             .also { println(it) }
@@ -55,7 +55,7 @@ data class Ticket(
         return false
     }
 
-    fun cleanTicket(): Ticket {
+    fun cloneTicketWithoutFullyInvalidNearbyTickets(): Ticket {
         val cleanNearbyTickets = nearbyTicketParameters.filter { list ->
             list.forEach {
                 if (!isInAnyValidCondition(it)) {
@@ -68,7 +68,8 @@ data class Ticket(
         return this.copy(nearbyTicketParameters = cleanNearbyTickets)
     }
 
-    fun cleanIndicesUp(input: Map<String, MutableList<Int>>): Map<String, Int> {
+    // Map always the only possible index for each validator
+    fun mapConditionToOnlyPossibleIndex(input: Map<String, MutableList<Int>>): Map<String, Int> {
         val result = mutableMapOf<String, Int>()
         val mutableInput = input.toMutableMap()
 
@@ -85,7 +86,8 @@ data class Ticket(
         return result
     }
 
-    fun mapConditionToIndices(): Map<String, MutableList<Int>> {
+    // Each validation rule can have more than one possible row
+    fun mapConditionToPotentialIndices(): Map<String, MutableList<Int>> {
         val result = mutableMapOf<String, MutableList<Int>>()
 
         conditions.forEach { (key, ranges) ->
