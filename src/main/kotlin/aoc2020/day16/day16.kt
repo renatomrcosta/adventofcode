@@ -42,19 +42,19 @@ data class Ticket(
     val ticketParameters: List<Int>,
     val nearbyTicketParameters: List<List<Int>>,
 ) {
-
-    private val flatConditions by lazy { this.nearbyTicketParameters.flatten() }
-
-    fun findAllFullyInvalidItemsInNearbyTickets() =
-        flatConditions.filter { !isInAnyValidCondition(it) }
+    private val flatConditions by lazy { conditions.values.flatten() }
 
     private fun isInAnyValidCondition(input: Int): Boolean {
-        for (range in conditions.values.flatten()) {
+        for (range in flatConditions) {
             if (range.contains(input)) return true
         }
         return false
     }
 
+    fun findAllFullyInvalidItemsInNearbyTickets() =
+        this.nearbyTicketParameters.flatten().filter { !isInAnyValidCondition(it) }
+
+    // Returns a clone of this object, but removing all fully invalid nearby tickets
     fun cloneTicketWithoutFullyInvalidNearbyTickets(): Ticket {
         val cleanNearbyTickets = nearbyTicketParameters.filter { list ->
             list.forEach {
