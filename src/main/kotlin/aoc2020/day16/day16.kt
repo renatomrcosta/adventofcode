@@ -5,14 +5,36 @@ import aoc2020.splitOnBlankLines
 import aoc2020.splitOnLineBreaks
 
 fun main() {
-
+    testData.toTicket().run {
+        findAllFullyInvalidItemsInNearbyTickets().run {
+            println("Invalids: $this")
+            println("Sum of invalids: ${this.sum()}")
+        }
+    }
+    readFile("day16.txt").toTicket().run {
+        findAllFullyInvalidItemsInNearbyTickets().run {
+            println("Invalids: $this")
+            println("Sum of invalids: ${this.sum()}")
+        }
+    }
 }
 
 data class Ticket(
     val conditions: Map<String, List<IntRange>>,
     val ticketParameters: List<Int>,
     val nearbyTicketParameters: List<List<Int>>,
-)
+) {
+    fun findAllFullyInvalidItemsInNearbyTickets() =
+        this.nearbyTicketParameters.flatten().filter { !isInAnyValidCondition(it) }
+
+
+    private fun isInAnyValidCondition(input: Int): Boolean {
+        for (range in conditions.values.flatten()) {
+            if (range.contains(input)) return true
+        }
+        return false
+    }
+}
 
 fun String.toTicket(): Ticket {
     val blocks = this.splitOnBlankLines().filter { it.isNotEmpty() }
@@ -24,8 +46,8 @@ fun String.toTicket(): Ticket {
 }
 
 fun buildNearbyParameters(input: String): List<List<Int>> {
-    val row = input.splitOnLineBreaks().last { it.isNotEmpty() }.trim()
-    return row.splitOnLineBreaks().filter { it.isNotEmpty() }.map { parseParameterListRow(it) }
+    val row = input.splitOnLineBreaks().drop(1).filter { it.isNotEmpty() }
+    return row.map { parseParameterListRow(it) }
 }
 
 fun buildTicketParameters(input: String): List<Int> {
