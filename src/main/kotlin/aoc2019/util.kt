@@ -1,3 +1,3 @@
 package aoc2019
 
-fun readFile(path: String): String = {}.javaClass.getResource(path).readText()
+internal fun readFile(path: String): String = {}.javaClass.getResource(path).readText()
