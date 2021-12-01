@@ -41,9 +41,17 @@ private fun part1(input: List<Int>) {
     println("Number of increased: ${result.size}")
 }
 
+private fun part1WithFold(input: List<Int>) {
+    var count = 0
+    val result = input.fold(null as Int?) { acc, it ->
+        if(acc != null && acc < it) count++
+        it
+    }
+    println("Number of increased: $count")
+}
+
 private fun part2(input: List<Int>) {
-    val parsedInput = input.windowed(3, partialWindows = true)
-        .filter { it.size == 3 }
+    val parsedInput = input.windowed(3)
         .map { it.sum() }
 
     part1(parsedInput)
