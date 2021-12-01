@@ -11,10 +11,14 @@ fun main() {
     println("Part1")
     println("Test input")
     part1(part1TestInput)
-
-    println("Part1")
     println("Input")
     part1(part1Input)
+
+    println("Part2")
+    println("Test input")
+    part2(part1TestInput)
+    println("Input")
+    part2(part1Input)
 }
 
 private fun part1(input: List<Int>) {
@@ -35,4 +39,12 @@ private fun part1(input: List<Int>) {
         }
     }
     println("Number of increased: ${result.size}")
+}
+
+private fun part2(input: List<Int>) {
+    val parsedInput = input.windowed(3, partialWindows = true)
+        .filter { it.size == 3 }
+        .map { it.sum() }
+
+    part1(parsedInput)
 }
