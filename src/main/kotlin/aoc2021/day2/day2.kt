@@ -14,11 +14,16 @@ private val testinput = """
 
 fun main() {
     val file = readFile("day2.txt")
-    val parsedTestInput = testinput.parseInput()
+    val parsedTestInput = testinput.parseInputPart1()
 
     println("Part1")
     check(calculatePart1(parsedTestInput) == 150L)
-    calculatePart1(file.parseInput()).run { println("Part1: $this") }
+    calculatePart1(file.parseInputPart1()).run { println("Part1: $this") }
+
+    println("----")
+    println("Part2")
+    check(calculatePart2(testinput) == 900L)
+    calculatePart2(file).run { println("Part2: $this") }
 
 }
 
@@ -29,6 +34,36 @@ private fun calculatePart1(input: Map<String, List<Long>>): Long {
     return forward * (down - up)
 }
 
-private fun String.parseInput() = this.splitOnLineBreaks()
+data class State(
+    var aim: Long = 0L,
+    var horizontal: Long = 0L,
+    var depth: Long = 0L,
+) {
+    val result: Long
+        get() = horizontal * depth
+}
+
+private fun calculatePart2(input: String): Long {
+    val state = State()
+    input.splitOnLineBreaks()
+        .map { it.split(" ").run { get(0) to get(1).toLong() } }
+        .forEach { pair ->
+            when (pair.first) {
+                "down" -> state.aim += pair.second
+                "up" -> state.aim -= pair.second
+                "forward" -> {
+                    state.horizontal += pair.second
+                    state.depth += (pair.second * state.aim)
+                }
+                else -> error("invalid direction")
+            }
+        }
+
+    println("final state: $state")
+    return state.result
+}
+
+private fun String.parseInputPart1() = this.splitOnLineBreaks()
     .map { it.split(" ").run { get(0) to get(1).toLong() } }
     .groupBy({ it.first }) { it.second }
+
