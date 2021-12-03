@@ -25,6 +25,11 @@ fun main() {
     println("PART1")
     check(calculatePart1(testInput) == 198)
     calculatePart1(file)
+
+    println("----")
+    println("PART2")
+    check(calculatePart2(testInput) == 230)
+    calculatePart2(file)
 }
 
 fun buildLenghtwiseMap(input: Sequence<String>): Map<Int, List<String>> =
@@ -60,4 +65,49 @@ fun calculatePart1(input: Sequence<String>): Int {
 
     println("Result: $result")
     return result
+}
+
+fun calculatePart2(input: Sequence<String>): Int {
+    val oxygen = findValueMatching(
+        input = input,
+        matchingChar = '1',
+        opposingChar = '0',
+    )
+
+    val co2 = findValueMatching(
+        input = input,
+        matchingChar = '0',
+        opposingChar = '1',
+    )
+
+    println("C02: $co2 | O2: $oxygen")
+    val result = co2 * oxygen
+    println("Result: $result")
+    return result
+}
+
+fun findValueMatching(
+    input: Sequence<String>,
+    matchingChar: Char,
+    opposingChar: Char,
+): Int {
+    var list = input.toMutableList()
+    (1..input.count()).forEachIndexed() { index, _ ->
+        val lenghtwiseList = buildLenghtwiseMap(list.asSequence())[index] ?: error("couldn't find list at index")
+
+        val zeroCount = lenghtwiseList.count { it == "0" }
+        val oneCount = lenghtwiseList.count { it == "1" }
+
+        if (zeroCount <= oneCount) {
+            list = list.filter { it[index] == matchingChar }.toMutableList()
+        } else {
+            list = list.filter { it[index] == opposingChar }.toMutableList()
+        }
+
+        if (list.size == 1) {
+            println("Value found! ${list.first()}")
+            return list.first().toInt(radix = 2).also { println("In decimal: $it") }
+        }
+    }
+    error("no value found!")
 }
