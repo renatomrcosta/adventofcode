@@ -31,9 +31,42 @@ fun main() {
     val file = readFile("day4.txt")
     testInput.parseInput().run { check(calculatePart1(this) == 4512) }
 
-    val part1 =  calculatePart1(file.parseInput())
+    val part1 = calculatePart1(file.parseInput())
     println("Part1 Result $part1")
 
+    println("Part2")
+//    testInput.parseInput().run { check(calculatePart2(this) == 1924) }
+    val part2 = calculatePart2(file.parseInput())
+    println("Part2 Result $part2")
+}
+
+private fun calculatePart2(bingoInput: BingoInput): Int {
+    var mutableInput = bingoInput.copy()
+    do {
+        val drawnNumber: Int = bingoInput.drawLog.removeFirst()
+        //mark Number
+        mutableInput.boards.forEach { board ->
+            board.forEach { row ->
+                row.find { it.number == drawnNumber }?.called = true
+            }
+        }
+
+        // tries to find winner
+        mutableInput.boards.forEach { board ->
+            if (board.isWinner()) {
+                // if this is the last board in the list, then take this winner and finish the game
+                if (mutableInput.boards.size == 1) {
+                    val sumOfNotCalled = board.flatMap { row -> row.filter { !it.called } }.sumOf { it.number }
+                    return sumOfNotCalled * drawnNumber
+                } else {
+                    // Otherwise, remove it from the processing
+                    mutableInput = mutableInput.copy(boards = mutableInput.boards.filterNot { it == board })
+                }
+            }
+        }
+
+
+    } while (true)
 }
 
 private fun calculatePart1(bingoInput: BingoInput): Int {
