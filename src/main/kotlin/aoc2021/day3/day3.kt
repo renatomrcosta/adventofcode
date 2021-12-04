@@ -32,7 +32,7 @@ fun main() {
     calculatePart2(file)
 }
 
-fun buildLenghtwiseMap(input: Sequence<String>): Map<Int, List<String>> =
+private fun buildLenghtwiseMap(input: Sequence<String>): Map<Int, List<String>> =
     buildMap<Int, MutableList<String>> {
         input.forEach {
             it.forEachIndexed { index, char ->
@@ -42,7 +42,7 @@ fun buildLenghtwiseMap(input: Sequence<String>): Map<Int, List<String>> =
         }
     }
 
-fun calculatePart1(input: Sequence<String>): Int {
+private fun calculatePart1(input: Sequence<String>): Int {
     val lenghtwiseMap = buildLenghtwiseMap(input)
 
     var gammaString = ""
@@ -67,7 +67,7 @@ fun calculatePart1(input: Sequence<String>): Int {
     return result
 }
 
-fun calculatePart2(input: Sequence<String>): Int {
+private fun calculatePart2(input: Sequence<String>): Int {
     val oxygen = findValueMatching(
         input = input,
         matchingChar = '1',
