@@ -22,15 +22,21 @@ fun main() {
     testInput.parse().run { check(calculatePart1(this) == 5) }
     val part1 = calculatePart1(file.parse())
     println("Part1 = $part1")
+
+    println("----")
+    println("Part2")
+    testInput.parse().run { check(calculatePart2(this) == 12) }
+    val part2 = calculatePart2(file.parse())
+    println("Part2 = $part2")
 }
 
 
 private fun calculatePart1(input: List<Pair<IntProgression, IntProgression>>): Int {
-    val xSize = input.maxOf { (x, _) -> if (x.first > x.last) x.first else x.last }
-    val ySize = input.maxOf { (_, y) -> if (y.first > y.last) y.first else y.last }
-    val board = List(xSize + 1) { MutableList(ySize + 1) { 0 } }
+    val board = createBoard(input)
 
-    input.filter { (x, y) -> x.first == x.last || y.first == y.last }
+    input
+        // only vertical and horizontal
+        .filter { (x, y) -> x.first == x.last || y.first == y.last }
         .forEach { (xRange, yRange) ->
             val pointsInLine = cartesianOf(xRange, yRange)
             pointsInLine.forEach { (x, y) ->
@@ -41,13 +47,42 @@ private fun calculatePart1(input: List<Pair<IntProgression, IntProgression>>): I
     return board.flatten().count { it >= 2 }
 }
 
-fun cartesianOf(xRange: IntProgression, yRange: IntProgression): List<Pair<Int, Int>> = buildList {
+private fun calculatePart2(input: List<Pair<IntProgression, IntProgression>>): Int {
+    val board = createBoard(input)
+
+    input
+        .forEach { (xRange, yRange) ->
+            val pointsInLine = pointsOf(xRange, yRange)
+            pointsInLine.forEach { (x, y) ->
+                board[x][y] += 1
+            }
+        }
+
+    return board.flatten().count { it >= 2 }
+}
+
+private fun createBoard(input: List<Pair<IntProgression, IntProgression>>): List<MutableList<Int>> {
+    val xSize = input.maxOf { (x, _) -> if (x.first > x.last) x.first else x.last }
+    val ySize = input.maxOf { (_, y) -> if (y.first > y.last) y.first else y.last }
+    return List(xSize + 1) { MutableList(ySize + 1) { 0 } }
+}
+
+private fun cartesianOf(xRange: IntProgression, yRange: IntProgression): List<Pair<Int, Int>> = buildList {
     xRange.forEach { x ->
         yRange.forEach { y ->
             add(x to y)
         }
     }
 }
+
+private fun pointsOf(xRange: IntProgression, yRange: IntProgression): List<Pair<Int, Int>> = buildList {
+    if (xRange.first == xRange.last || yRange.first == yRange.last) {
+        addAll(cartesianOf(xRange, yRange))
+    } else {
+        addAll(xRange.zip(yRange))
+    }
+}
+
 
 private fun String.parse() = this.splitOnLineBreaks()
     .map {
