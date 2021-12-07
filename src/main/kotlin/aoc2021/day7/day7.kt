@@ -22,13 +22,12 @@ fun main() {
 
 fun calculatePart2(input: List<Int>): Int {
     val maxSize = input.last()
-    val map = mutableMapOf<Int, Int>().apply {
-        (0..maxSize).forEach { this[it] = 0 }
-    }
-    input.sorted().groupingBy { it }.eachCountTo(map)
-    val (index, totalFuel) = map.keys.map { position ->
-        val sum = map.entries.filter { it.value != 0 }.sumOf { (index, crabCount) ->
+    val map = input.sorted().groupingBy { it }.eachCount()
+
+    val (index, totalFuel) = (0..maxSize).map { position ->
+        val sum = map.entries.sumOf { (index, crabCount) ->
             val distance = abs(index - position)
+
             /***
             // I completely brainfarted in here, and made an iteration because I couldn't work out the equation quickly
             var totalCost = 0
@@ -51,14 +50,11 @@ fun calculatePart2(input: List<Int>): Int {
 
 private fun calculatePart1(input: List<Int>): Int {
     val maxSize = input.last()
-    val map = mutableMapOf<Int, Int>().apply {
-        (0..maxSize).forEach { this[it] = 0 }
-    }
-    input.sorted().groupingBy { it }.eachCountTo(map)
+    val map = input.sorted().groupingBy { it }.eachCount()
 
     // For each position, find the sum of the deltas of all items and their distances
-    val (index, totalFuel) = map.keys.map { position ->
-        val sum = map.entries.filter { it.value != 0 }.sumOf { (index, crabCount) ->
+    val (index, totalFuel) = (0..maxSize).map { position ->
+        val sum = map.entries.sumOf { (index, crabCount) ->
             val distance = abs(index - position)
             distance * crabCount
         }
