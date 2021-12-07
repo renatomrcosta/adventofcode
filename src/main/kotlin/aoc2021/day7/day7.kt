@@ -9,14 +9,44 @@ fun main() {
     val file = readFile("day7.txt")
 
     println("Part1")
-    testInput.parse().run { calculatePart1(this) == 37 }
+    testInput.parse().run { check(calculatePart1(this) == 37) }
     val part1 = calculatePart1(file.parse())
     println("Part1 = $part1")
 
-//    testInput.parse().run { calculatePart2(this) == 168 }
-//    val part2 = calculatePart2(file.parse())
-//    println("Part2 = $part2")
+    println("Part2")
+    testInput.parse().run { check(calculatePart2(this) == 168) }
+    val part2 = calculatePart2(file.parse())
+    println("Part2 = $part2")
 
+}
+
+fun calculatePart2(input: List<Int>): Int {
+    val maxSize = input.last()
+    val map = mutableMapOf<Int, Int>().apply {
+        (0..maxSize).forEach { this[it] = 0 }
+    }
+    input.sorted().groupingBy { it }.eachCountTo(map)
+    val (index, totalFuel) = map.keys.map { position ->
+        val sum = map.entries.filter { it.value != 0 }.sumOf { (index, crabCount) ->
+            val distance = abs(index - position)
+            /***
+            // I completely brainfarted in here, and made an iteration because I couldn't work out the equation quickly
+            var totalCost = 0
+            var initialCost = 1
+            repeat(distance) {
+            totalCost += initialCost
+            initialCost++
+            }
+            println("Total Cost for $index = $totalCost")
+             ***/
+            val totalCost = ((distance + 1) * distance) / 2
+            crabCount * totalCost
+        }
+        position to sum
+    }.minByOrNull { it.second } ?: error("no min value found")
+
+    println("Index: $index, Total fuel spent $totalFuel")
+    return totalFuel
 }
 
 private fun calculatePart1(input: List<Int>): Int {
