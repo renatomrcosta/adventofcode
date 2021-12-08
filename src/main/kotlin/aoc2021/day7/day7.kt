@@ -20,7 +20,7 @@ fun main() {
 
 }
 
-fun calculatePart2(input: List<Int>): Int {
+private fun calculatePart2(input: List<Int>): Int {
     val maxSize = input.last()
     val map = input.sorted().groupingBy { it }.eachCount()
 
