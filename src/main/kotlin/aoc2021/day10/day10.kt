@@ -23,6 +23,10 @@ fun main() {
     check(calculatePart1(input = testData.parse()) == 26397L)
     calculatePart1(file.parse()).run { println("Part1: $this") }
 
+    println("Part2")
+    check(calculatePart2(testData.parse()) == 288957L)
+    calculatePart2(file.parse()).run { println("Part2: $this") }
+
 }
 
 private fun String.parse() =
@@ -31,6 +35,33 @@ private fun String.parse() =
 
 private fun calculatePart1(input: List<String>): Long {
     return input.sumOf { it.getFirstIllegalCharPointsOrNull() ?: 0L }
+}
+
+private fun calculatePart2(input: List<String>): Long {
+    val (incompleteLines, corruptedLines) = input.partitionOnCorruptedLines()
+    val sortedResults = incompleteLines
+        .map { it.getCompletionString().toTotalPoints() }
+        .sorted()
+    return sortedResults[sortedResults.size / 2]
+}
+
+private fun String.toTotalPoints(): Long =
+    this.map { closingToPointMap[it] ?: error("noopoo") }.reduce { acc, score ->
+        (acc * 5L) + score
+    }
+
+private fun String.getCompletionString(): String {
+    val accumulatorStack = Stack<Char>()
+
+    this.forEach { char ->
+        if (char.isOpeningClosure()) accumulatorStack.push(char)
+        else {
+            if (char.matchesOpeningClosure(accumulatorStack.peek())) {
+                accumulatorStack.pop()
+            }
+        }
+    }
+    return accumulatorStack.joinToString("").map { chunkClosures[it] ?: ' ' }.reversed().joinToString("")
 }
 
 private fun String.getFirstIllegalCharPointsOrNull(): Long? {
@@ -54,7 +85,7 @@ private fun String.getFirstIllegalCharPointsOrNull(): Long? {
     return null
 }
 
-private fun List<String>.filterCorruptedLines(): Pair<List<String>, List<String>> = this.partition {
+private fun List<String>.partitionOnCorruptedLines(): Pair<List<String>, List<String>> = this.partition {
     it.getFirstIllegalCharPointsOrNull()?.let { false } ?: true
 }
 
@@ -68,4 +99,10 @@ private val chunkClosures = mapOf(
     '[' to ']',
     '{' to '}',
     '<' to '>',
+)
+private val closingToPointMap = mapOf(
+    ')' to 1L,
+    ']' to 2L,
+    '}' to 3L,
+    '>' to 4L,
 )
