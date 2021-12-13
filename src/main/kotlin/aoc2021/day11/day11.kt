@@ -1,7 +1,6 @@
 package aoc2021.day11
 
 import aoc2021.prettyPrint
-import aoc2021.readFile
 import aoc2021.splitOnLineBreaks
 
 private val testData = """
@@ -33,6 +32,25 @@ private val realData = """
 fun main() {
     calculatePart1(testData.parse()).run { check(this == 1656) }
     calculatePart1(realData.parse()).run { println("Part1: $this") }
+
+    calculatePart2(testData.parse()).run { check(this == 195) { "Wrong value $this" } }
+    calculatePart2(realData.parse()).run { println("Part2: $this") }
+
+}
+
+private fun calculatePart2(input: List<List<Octopus>>): Int {
+    var step = 0
+    while (true) {
+        doStep(input)
+        step++
+//        if (step == 195 || step == 196) {
+//            println("Step $step")
+//            prettyPrint(input)
+//        }
+        if (input.flatten().all { it.energyLevel == 0 }) {
+            return step
+        }
+    }
 }
 
 private fun calculatePart1(input: List<List<Octopus>>): Int {
@@ -110,6 +128,7 @@ private data class Octopus(
             shineCount++
         }
     }
+
     fun reset() {
         hasShined = false
         energyLevel = 0
