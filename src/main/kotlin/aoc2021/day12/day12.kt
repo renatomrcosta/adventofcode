@@ -11,6 +11,10 @@ fun main() {
     calculatePart1(testDataXXL.parse()).run { check(this == 226) }
     calculatePart1(file.parse()).run { println("Part1 $this") }
 
+    calculatePart2(testData.parse()).run { check(this == 36) }
+    calculatePart2(testDataLarger.parse()).run { check(this == 103) }
+    calculatePart2(testDataXXL.parse()).run { check(this == 3509) }
+    calculatePart2(file.parse()).run { println("Part2 $this") }
 }
 
 private fun String.parse(): Graph<Cave> {
@@ -35,9 +39,19 @@ private fun calculatePart1(caves: Graph<Cave>): Int {
     return results.size
 }
 
+private fun calculatePart2(caves: Graph<Cave>): Int {
+    println("$caves")
+    val startingPoint = caves.adjacencyMap.keys.first { it.value == "start" }
+    val traversal = Stack<Cave>()
+    val results = mutableListOf<List<Cave>>()
+
+    traversePart2(caves = caves, cave = startingPoint, traversal = traversal, results = results)
+
+    results.forEach { println(it) }
+    return results.size
+}
+
 private fun traverse(caves: Graph<Cave>, cave: Cave, traversal: Stack<Cave>, results: MutableList<List<Cave>>) {
-    // ignore returns to start
-    if (cave.value == "start" && traversal.contains(cave)) return
     traversal.push(cave)
 
     if (cave == Cave("end")) {
@@ -54,10 +68,32 @@ private fun traverse(caves: Graph<Cave>, cave: Cave, traversal: Stack<Cave>, res
     }
 }
 
-private data class Cave(val value: String) {
-    var type: CaveType = if (this.value.first().isUpperCase()) CaveType.Big else CaveType.Small
-        private set
+private fun traversePart2(caves: Graph<Cave>, cave: Cave, traversal: Stack<Cave>, results: MutableList<List<Cave>>) {
+    // ignore returns to start
+    if (cave.value == "start" && traversal.contains(cave)) return
+    traversal.push(cave)
 
+    if (cave == Cave("end")) {
+//        println("Finished: $traversal")
+        results.add(traversal.toList())
+        return
+    }
+
+    val hasDoubleVisitToSmall = traversal.groupingBy { it }
+        .eachCount()
+        .any { (key, count) -> key.type == CaveType.Small && count >= 2 }
+
+    caves.adjacencyMap[cave]
+        ?.filterNot { it.value == "start" }
+        ?.filterNot { if (hasDoubleVisitToSmall) it.type == CaveType.Small && traversal.contains(it) else false }
+        ?.forEach { connection ->
+            traversePart2(caves = caves, cave = connection, traversal = traversal, results = results)
+            traversal.pop()
+        }
+}
+
+private data class Cave(val value: String) {
+    val type: CaveType = if (this.value.first().isUpperCase()) CaveType.Big else CaveType.Small
     override fun toString(): String = value
 }
 
@@ -107,6 +143,7 @@ private val testDataXXL = """
     start-RW
 """.trimIndent()
 
+// Stolen from https://developerlife.com/2018/08/16/algorithms-in-kotlin-5/
 private data class Graph<T>(val adjacencyMap: HashMap<T, HashSet<T>> = HashMap()) {
     fun addEdge(sourceVertex: T, destinationVertex: T) {
         // Add edge to source vertex / node.
@@ -126,4 +163,3 @@ private data class Graph<T>(val adjacencyMap: HashMap<T, HashSet<T>> = HashMap()
         }
     }.toString()
 }
-
