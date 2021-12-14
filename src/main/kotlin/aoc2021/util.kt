@@ -7,7 +7,7 @@ internal fun String.splitOnLineBreaks(): Sequence<String> = this.splitToSequence
 internal fun String.splitOnBlankLines(): Sequence<String> = this.splitToSequence(Regex("\\n[\\n]+", setOf(RegexOption.MULTILINE)))
 internal inline fun withExecutionTime(block: () -> Unit) = measureTimeMillis(block).run { println("Executed in ${this}ms") }
 internal fun prettyPrint(rules: List<List<Any>>) {
-    println("--------")
+    println("$$$$$$$$$$$$$$$$$$$$$$$$")
     rules.map { it.reduce { acc, s -> "$acc$s" } }.forEach { println(it) }
-    println("--------")
+    println("$$$$$$$$$$$$$$$$$$$$$$$$")
 }
