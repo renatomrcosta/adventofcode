@@ -3,7 +3,6 @@ package aoc2021.day14
 import aoc2021.readFile
 import aoc2021.splitOnBlankLines
 import aoc2021.splitOnLineBreaks
-import java.util.*
 
 private val testData = """
     NNCB
@@ -28,18 +27,21 @@ private val testData = """
 
 fun main() {
     val file = readFile("day14.txt")
-    calculatePart1(testData.parse()).run { check(this == 1588) {"What? $this"} }
+    calculatePart1(testData.parse()).run { check(this == 1588) { "What? $this" } }
     calculatePart1(file.parse()).run { println("Part1 $this") }
 
+    calculatePart2(testData.parse(), 40).run { check(this == 2188189693529) { "What? $this" } }
+    calculatePart2(testData.parse(), 10).run { check(this == 1588L) { "What? $this" } }
+
+    calculatePart2(file.parse(), 10).run { check(this == 3342L) { "Result was $this"} }
+    calculatePart2(file.parse(), 40).run { println("Part2 $this") }
 }
 
 private fun calculatePart1(input: Input): Int {
     val final = (1..10).fold(input.template) { acc: String, i: Int ->
         step(acc, input.rules)
-//            .also { println("step $i $it") }
     }
 //    println("Final Polymer: $final")
-
     val sorting = final.toList().groupingBy { it }.eachCount()
         .map { (key, count) -> key to count }
         .sortedBy { (key, count) -> count }
@@ -47,14 +49,44 @@ private fun calculatePart1(input: Input): Int {
     return sorting.last().second - sorting.first().second
 }
 
-private fun step(inputString: String, rules: Map<String, String>): String {
-    val inputAsList = inputString.toMutableList()
+private fun calculatePart2(input: Input, steps: Int): Long {
+    val letterCounter =
+        input.template.groupBy { it.toString() }.mapValues { (_, values) -> values.size.toLong() }.toMutableMap()
+    val pairCounter = input.template.windowed(2).associateWith { 1L }.toMutableMap()
 
-    val charsToInsert = inputString.windowed(2).map { window ->
+    repeat(steps) {
+        step2(letterCounter, pairCounter, input.rules)
+    }
+
+    println("LetterCounter: $letterCounter")
+    return letterCounter.maxOf { (letter, count) -> count } - letterCounter.minOf { (letter, count) -> count }
+}
+
+private fun step(inputString: String, rules: Map<String, String>): String {
+    val inputAsList = inputString.asSequence()
+
+    val charsToInsert = inputString.windowedSequence(2).map { window ->
         rules[window]?.first() ?: error("aaa")
     }
 
     return zipWithDifferentSizes(inputAsList, charsToInsert).joinToString("")
+}
+
+private fun step2(
+    letterCounter: MutableMap<String, Long>,
+    pairCounter: MutableMap<String, Long>,
+    rules: Map<String, String>
+) {
+    pairCounter.toList()
+        .also { pairCounter.clear() }
+        .forEach { (key, count) ->
+            val letter = rules[key] ?: error("wah")
+            val pair1 = key.first() + letter
+            val pair2 = letter + key.last()
+            pairCounter[pair1] = pairCounter.getOrDefault(pair1, 0L) + count
+            pairCounter[pair2] = pairCounter.getOrDefault(pair2, 0L) + count
+            letterCounter[letter] = letterCounter.getOrDefault(letter, 0L) + count
+        }
 }
 
 private fun String.parse(): Input {
@@ -73,7 +105,7 @@ private fun String.parse(): Input {
     )
 }
 
-private fun <T> zipWithDifferentSizes(first: Iterable<T>, second: Iterable<T>) = sequence {
+private fun <T> zipWithDifferentSizes(first: Sequence<T>, second: Sequence<T>) = sequence {
     val firstIterator = first.iterator()
     val secondIterator = second.iterator()
     while (firstIterator.hasNext() && secondIterator.hasNext()) {
@@ -84,6 +116,5 @@ private fun <T> zipWithDifferentSizes(first: Iterable<T>, second: Iterable<T>) =
     yieldAll(firstIterator)
     yieldAll(secondIterator)
 }.toList()
-
 
 private data class Input(val template: String, val rules: Map<String, String>)
