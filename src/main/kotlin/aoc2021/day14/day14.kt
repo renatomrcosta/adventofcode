@@ -33,7 +33,7 @@ fun main() {
     calculatePart2(testData.parse(), 40).run { check(this == 2188189693529) { "What? $this" } }
     calculatePart2(testData.parse(), 10).run { check(this == 1588L) { "What? $this" } }
 
-    calculatePart2(file.parse(), 10).run { check(this == 3342L) { "Result was $this"} }
+    calculatePart2(file.parse(), 10).run { check(this == 3342L) { "Result was $this" } }
     calculatePart2(file.parse(), 40).run { println("Part2 $this") }
 }
 
@@ -52,7 +52,8 @@ private fun calculatePart1(input: Input): Int {
 private fun calculatePart2(input: Input, steps: Int): Long {
     val letterCounter =
         input.template.groupBy { it.toString() }.mapValues { (_, values) -> values.size.toLong() }.toMutableMap()
-    val pairCounter = input.template.windowed(2).associateWith { 1L }.toMutableMap()
+    val pairCounter =
+        input.template.windowed(2).groupingBy { it }.eachCount().mapValues { it.value.toLong() }.toMutableMap()
 
     repeat(steps) {
         step2(letterCounter, pairCounter, input.rules)
