@@ -58,14 +58,15 @@ private fun traverseShortestPath(
     var currentNode = start
 
     while (notVisited.isNotEmpty() && notVisited.contains(end)) {
-        graph.adjacencyMap.getValue(currentNode).filter { it in notVisited }.onEach { adjacent ->
-            val totalRisk = adjacent.risk
+        graph.adjacencyMap.getValue(currentNode).filter { it in notVisited }.forEach { adjacent ->
+            // TODO figure this out
+            val totalRisk = adjacent.risk + currentNode.risk
             if (distances.getValue(adjacent) > totalRisk) {
                 distances[adjacent] = totalRisk
             }
-        }.forEach { adjacent ->
-            notVisited.remove(adjacent)
         }
+        notVisited.remove(currentNode)
+
         if (!notVisited.contains(end)) {
             println("End visited")
             break
@@ -73,11 +74,10 @@ private fun traverseShortestPath(
         if (notVisited.minOf { it.risk } == Integer.MAX_VALUE) {
             error("No pathway to end result")
         }
-        currentNode = notVisited.minByOrNull { it.risk }?.also {
-            path.add(currentNode)
-        } ?: error("whut?")
+        currentNode = distances.filter { it.key in notVisited }.minByOrNull { it.value }?.key ?: error("no weh hoseh")
     }
     println("Path $path")
+    println("Distances $distances")
     return path
 }
 
