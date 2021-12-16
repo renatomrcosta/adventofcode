@@ -76,11 +76,15 @@ fun main() {
 
     calculate(fullTestDataPT2.parse()).run { check(this == 315) }
 
-    calculate(testData.parsePart2()).run {
-        check(this == 315) { "$this" }
+    withExecutionTime {
+        calculate(testData.parsePart2()).run {
+            check(this == 315) { "$this" }
+            println("heyyo")
+        }
     }
-
-    calculate(file.parsePart2()).run { println("Part2: $this") }
+    withExecutionTime {
+        calculate(file.parsePart2()).run { println("Part2: $this") }
+    }
 }
 
 private fun calculate(input: List<List<Int>>): Int {
@@ -89,7 +93,7 @@ private fun calculate(input: List<List<Int>>): Int {
     val start = Coordinate(0, 0)
     val end = Coordinate(input.lastIndex, input.first().lastIndex)
 
-    val tree = dijkstra(Graph(weights = map), start)
+    val tree = dijkstra(Graph(weights = map), start, end)
 
     return shortestPath(shortestPathTree = tree, start = start, end = end)
         .drop(1)
@@ -196,30 +200,29 @@ private data class Graph<T>(
     }
 }
 
-private fun <T> dijkstra(graph: Graph<T>, start: T): Map<T, T?> {
-    val S: MutableSet<T> = mutableSetOf() // a subset of vertices, for which we know the true distance
+private fun <T> dijkstra(graph: Graph<T>, start: T, end: T): Map<T, T?> {
+    val unvisited = graph.vertices.toMutableSet()
 
-    val delta = graph.vertices.map { it to Int.MAX_VALUE }.toMap().toMutableMap()
-    delta[start] = 0
+    val delta = graph.vertices.associateWith { Int.MAX_VALUE }.toMutableMap().apply {
+        this[start] = 0
+    }
 
-    val previous: MutableMap<T, T?> = graph.vertices.map { it to null }.toMap().toMutableMap()
+    val previous: MutableMap<T, T?> = graph.vertices.associateWith { null }.toMutableMap()
+    var current = start
 
-    while (S != graph.vertices) {
-        val v: T = delta
-            .filter { !S.contains(it.key) }
-            .minByOrNull { it.value }!!
-            .key
-
-        graph.edges.getValue(v).minus(S).forEach { neighbor ->
-            val newPath = delta.getValue(v) + graph.weights.getValue(Pair(v, neighbor))
+    while (true) {
+        graph.edges.getValue(current).asSequence().filter { it in unvisited }.forEach { neighbor ->
+            val newPath = delta.getValue(current) + graph.weights.getValue(Pair(current, neighbor))
 
             if (newPath < delta.getValue(neighbor)) {
                 delta[neighbor] = newPath
-                previous[neighbor] = v
+                previous[neighbor] = current
             }
         }
+        unvisited.remove(current)
+        if(current == end) break
 
-        S.add(v)
+        current = delta.asSequence().filter { it.key in unvisited }.minByOrNull { it.value }?.key ?: error("unable to proceed")
     }
 
     return previous.toMap()
