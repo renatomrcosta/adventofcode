@@ -83,6 +83,7 @@ fun main() {
         }
     }
     withExecutionTime {
+        // this crap will take more than 2.5h to execute. Good luck!
         calculate(file.parsePart2()).run { println("Part2: $this") }
     }
 }
@@ -210,7 +211,9 @@ private fun <T> dijkstra(graph: Graph<T>, start: T, end: T): Map<T, T?> {
     val previous: MutableMap<T, T?> = graph.vertices.associateWith { null }.toMutableMap()
     var current = start
 
+    // This is solely for this example here.
     while (true) {
+//    while (unvisited.isNotEmpty()) {
         graph.edges.getValue(current).asSequence().filter { it in unvisited }.forEach { neighbor ->
             val newPath = delta.getValue(current) + graph.weights.getValue(Pair(current, neighbor))
 
@@ -222,7 +225,11 @@ private fun <T> dijkstra(graph: Graph<T>, start: T, end: T): Map<T, T?> {
         unvisited.remove(current)
         if(current == end) break
 
-        current = delta.asSequence().filter { it.key in unvisited }.minByOrNull { it.value }?.key ?: error("unable to proceed")
+        current = delta.asSequence()
+            .filter { it.key in unvisited }
+            .minByOrNull { it.value }?.key ?: error(" no min found in unvisited. Unable to proceed")
+
+//        if(delta[current] == Int.MAX_VALUE) error("unable to traverse further")
     }
 
     return previous.toMap()
