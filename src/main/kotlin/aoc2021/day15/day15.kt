@@ -1,6 +1,7 @@
 package aoc2021.day15
 
 import aoc2021.*
+import java.util.*
 
 private val testData = """
     1163751742
@@ -204,32 +205,41 @@ private data class Graph<T>(
 private fun <T> dijkstra(graph: Graph<T>, start: T, end: T): Map<T, T?> {
     val unvisited = graph.vertices.toMutableSet()
 
-    val delta = graph.vertices.associateWith { Int.MAX_VALUE }.toMutableMap().apply {
-        this[start] = 0
+    val deltas = graph.vertices.filterNot { it == start }.associateWith { Int.MAX_VALUE }.toMutableMap().apply {
+        put(start, 0)
+    }
+
+    val pathQueue = PriorityQueue<Pair<T, Int>>(compareBy { (item, weight) -> weight }).apply {
+        add(start to 0)
+        addAll(graph.vertices.filterNot { it == start }.map { it to Int.MAX_VALUE })
     }
 
     val previous: MutableMap<T, T?> = graph.vertices.associateWith { null }.toMutableMap()
-    var current = start
 
     // This is solely for this example here.
     while (true) {
 //    while (unvisited.isNotEmpty()) {
-        graph.edges.getValue(current).asSequence().filter { it in unvisited }.forEach { neighbor ->
-            val newPath = delta.getValue(current) + graph.weights.getValue(Pair(current, neighbor))
+        val (current, currentValue) = pathQueue.poll() ?: error("Unable to poll priority queue")
 
-            if (newPath < delta.getValue(neighbor)) {
-                delta[neighbor] = newPath
+        if(current == end) break
+
+        graph.edges.getValue(current).asSequence().filter { it in unvisited }.forEach { neighbor ->
+            val newPath = currentValue + graph.weights.getValue(Pair(current, neighbor))
+
+            val neighborDeltaValue = deltas.getValue(neighbor)
+            if (newPath < neighborDeltaValue) {
+                deltas[current] = newPath
+                deltas[neighbor] = newPath
+
+                pathQueue.remove(neighbor to neighborDeltaValue)
+                pathQueue.add(neighbor to newPath)
+
                 previous[neighbor] = current
             }
         }
         unvisited.remove(current)
-        if(current == end) break
 
-        current = delta.asSequence()
-            .filter { it.key in unvisited }
-            .minByOrNull { it.value }?.key ?: error(" no min found in unvisited. Unable to proceed")
-
-//        if(delta[current] == Int.MAX_VALUE) error("unable to traverse further")
+//        if(deltas[current] == Int.MAX_VALUE) error("unable to traverse further")
     }
 
     return previous.toMap()
