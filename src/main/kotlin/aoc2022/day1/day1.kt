@@ -23,6 +23,7 @@ val testInput = """
 
 fun main() {
     part1()
+    part2()
 }
 
 private fun part1() {
@@ -38,7 +39,21 @@ private fun part1() {
     }
 }
 
-private fun List<List<Int>>.getMostCalories() = this.map { it.sum() }.sorted().last()
+private fun part2() {
+    // Test
+    groupCaloriesPerElf(testInput).run {
+        val topThreeCalories = getTopThreeCaloriesSum()
+        require(topThreeCalories == 45_000)
+    }
+    // Input
+    val file = readFile("day1.txt")
+    groupCaloriesPerElf(file).run {
+        println("Top 3: ${getTopThreeCaloriesSum()}")
+    }
+}
+
+private fun List<List<Int>>.getMostCalories() = this.map { it.sum() }.maxOf { it }
+private fun List<List<Int>>.getTopThreeCaloriesSum() = this.map { it.sum() }.sortedDescending().take(3).sum()
 
 private fun groupCaloriesPerElf(input: String): List<List<Int>> {
     return input.splitOnBlankLines().toList()
