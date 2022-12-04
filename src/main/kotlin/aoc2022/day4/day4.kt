@@ -16,12 +16,17 @@ fun main() {
     val input = readFile("day4.txt")
     part1(testInput).run { require(this == 2) }
     part1(input).run { println("Part1: $this") }
+
+    part2(testInput).run { require(this == 4) }
+    part2(input).run { println("Part2: $this") }
 }
 
-private fun part1(input: String): Int {
-    return input.parseInput().count { (left, right) ->
-        left.containsAll(right) || right.containsAll(left)
-    }
+private fun part1(input: String): Int = input.parseInput().count { (left, right) ->
+    left.containsAll(right) || right.containsAll(left)
+}
+
+private fun part2(input: String): Int = input.parseInput().count { (left, right) ->
+    (left intersect right).isNotEmpty()
 }
 
 private fun String.parseInput() = this.splitOnLineBreaks()
