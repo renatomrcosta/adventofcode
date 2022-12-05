@@ -57,7 +57,7 @@ private fun part2(input: String): String =
 
 private fun String.parseInput(): Pair<List<ArrayDeque<Char>>, Sequence<Instruction>> {
     val (stack, moves) = this.splitOnBlankLines().toList()
-    return stack.parseStack() to moves.parseMoves()
+    return stack.parseStackTransposing() to moves.parseMoves()
 }
 
 private fun String.parseStack(): List<ArrayDeque<Char>> = buildList {
@@ -76,6 +76,33 @@ private fun String.parseStack(): List<ArrayDeque<Char>> = buildList {
                 }
             }
         }
+}
+
+private fun String.parseStackTransposing(): List<ArrayDeque<Char>> = buildList {
+    this@parseStackTransposing.splitOnLineBreaks().toList().dropLast(1).map {
+        it.chunked(size = 4)
+    }.transpose()
+        .onEach { this.add(ArrayDeque()) }
+        .forEachIndexed() { index, row ->
+            row.reversed().map { box ->
+                if (!box.isNullOrBlank()) {
+                    this[index].addLast(box[1])
+                }
+            }
+        }
+}
+
+private fun <T> List<List<T>>.transpose(): List<List<T?>> {
+    val rowSize = this.size
+    val colSize = this.first().size
+    val transposed = MutableList(colSize) { MutableList<T?>(rowSize) { null } }
+
+    for (i in 0 until rowSize) {
+        for (j in 0 until colSize) {
+            transposed[j][i] = this[i][j]
+        }
+    }
+    return transposed
 }
 
 private fun String.parseMoves(): Sequence<Instruction> {
