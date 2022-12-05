@@ -16,6 +16,19 @@ internal fun prettyPrint(rules: List<List<Any>>) {
     println("$$$$$$$$$$$$$$$$$$$$$$$$")
 }
 
+fun <T> List<List<T>>.transpose(): List<List<T?>> {
+    val rowSize = this.size
+    val colSize = this.first().size
+    val transposed = MutableList(colSize) { MutableList<T?>(rowSize) { null } }
+
+    for (i in 0 until rowSize) {
+        for (j in 0 until colSize) {
+            transposed[j][i] = this[i][j]
+        }
+    }
+    return transposed
+}
+
 
 fun kingsMoveOf(x: Int, y: Int) = buildList {
     add(x - 1 to y)

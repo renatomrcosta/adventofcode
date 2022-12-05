@@ -3,6 +3,7 @@ package aoc2022.day5
 import aoc2022.readFile
 import aoc2022.splitOnBlankLines
 import aoc2022.splitOnLineBreaks
+import aoc2022.transpose
 
 private val testInput = """
     [D]    
@@ -90,19 +91,6 @@ private fun String.parseStackTransposing(): List<ArrayDeque<Char>> = buildList {
                 }
             }
         }
-}
-
-private fun <T> List<List<T>>.transpose(): List<List<T?>> {
-    val rowSize = this.size
-    val colSize = this.first().size
-    val transposed = MutableList(colSize) { MutableList<T?>(rowSize) { null } }
-
-    for (i in 0 until rowSize) {
-        for (j in 0 until colSize) {
-            transposed[j][i] = this[i][j]
-        }
-    }
-    return transposed
 }
 
 private fun String.parseMoves(): Sequence<Instruction> {
