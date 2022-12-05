@@ -8,7 +8,7 @@ private val testInput = """
     [D]    
 [N] [C]    
 [Z] [M] [P]
-1   2   3
+ 1   2   3
 
 move 1 from 2 to 1
 move 3 from 1 to 3
@@ -16,35 +16,17 @@ move 2 from 2 to 1
 move 1 from 1 to 2
 """.trimMargin()
 
-fun testInputStacks() = listOf(
-    ArrayDeque(listOf('Z', 'N')),
-    ArrayDeque(listOf('M', 'C', 'D')),
-    ArrayDeque(listOf('P')),
-)
-
-fun inputStacks() = listOf(
-    ArrayDeque(listOf('Q', 'F', 'M', 'R', 'L', 'W', 'C', 'V')),
-    ArrayDeque(listOf('D', 'Q', 'L')),
-    ArrayDeque(listOf('P', 'S', 'R', 'G', 'W', 'C', 'N', 'B')),
-    ArrayDeque(listOf('L', 'C', 'D', 'H', 'B', 'Q', 'G')),
-    ArrayDeque(listOf('V', 'G', 'L', 'F', 'Z', 'S')),
-    ArrayDeque(listOf('D', 'G', 'N', 'P')),
-    ArrayDeque(listOf('D', 'Z', 'P', 'V', 'F', 'C', 'W')),
-    ArrayDeque(listOf('C', 'P', 'D', 'M', 'S')),
-    ArrayDeque(listOf('Z', 'N', 'W', 'T', 'V', 'M', 'P', 'C')),
-)
-
 fun main() {
     val input = readFile("day5.txt")
-    part1(testInput, testInputStacks()).run { require(this == "CMZ") { println("THIS $this")} }
-    part1(input, inputStacks()).run { println("Part1: $this") }
-    //
-    part2(testInput, testInputStacks()).run { require(this == "MCD") { println("THIS $this") } }
-    part2(input, inputStacks()).run { println("Part2: $this") }
+    part1(testInput).run { require(this == "CMZ") { println("THIS $this") } }
+    part1(input).run { println("Part1: $this") }
+
+    part2(testInput).run { require(this == "MCD") { println("THIS $this") } }
+    part2(input).run { println("Part2: $this") }
 }
 
-private fun part1(input: String, inputStacks: List<ArrayDeque<Char>>): String =
-    input.parseInput(inputStacks)
+private fun part1(input: String): String =
+    input.parseInput()
         .let { (stacks, moves) ->
             println("Stacks before: $stacks")
             moves.forEach { move ->
@@ -59,8 +41,8 @@ private fun part1(input: String, inputStacks: List<ArrayDeque<Char>>): String =
             stacks.map { it.last() }.joinToString("")
         }
 
-private fun part2(input: String, inputStacks: List<ArrayDeque<Char>>): String =
-    input.parseInput(inputStacks)
+private fun part2(input: String): String =
+    input.parseInput()
         .let { (stacks, moves) ->
             println("Stacks before: $stacks")
             moves.forEach { move ->
@@ -73,13 +55,27 @@ private fun part2(input: String, inputStacks: List<ArrayDeque<Char>>): String =
             stacks.map { it.last() }.joinToString("")
         }
 
-private fun String.parseInput(stack: List<ArrayDeque<Char>>): Pair<List<ArrayDeque<Char>>, Sequence<Instruction>> {
-    val moves = this.splitOnBlankLines().last()
-    return stack to moves.parseMoves()
+private fun String.parseInput(): Pair<List<ArrayDeque<Char>>, Sequence<Instruction>> {
+    val (stack, moves) = this.splitOnBlankLines().toList()
+    return stack.parseStack() to moves.parseMoves()
 }
 
-private fun String.parseStack() {
-    this.splitOnLineBreaks().toList().dropLast(1).map { }
+private fun String.parseStack(): List<ArrayDeque<Char>> = buildList {
+    val inputRows = this@parseStack.splitOnLineBreaks().toList()
+    val rowNumbersRow = inputRows.last()
+    val stackIds = numberRegex.findAll(rowNumbersRow).map { it.value }.toList()
+
+    repeat(stackIds.size) { this.add(ArrayDeque()) }
+
+    inputRows.dropLast(1).reversed()
+        .forEach { row ->
+            stackIds.forEach { stackId ->
+                val charAtColumn = row[rowNumbersRow.indexOf(stackId)]
+                if (charAtColumn in letterRange) {
+                    this[stackId.toInt() - 1].addLast(charAtColumn)
+                }
+            }
+        }
 }
 
 private fun String.parseMoves(): Sequence<Instruction> {
@@ -94,3 +90,4 @@ private data class Instruction(
 )
 
 private val numberRegex = "[0-9]{1,2}".toRegex()
+private val letterRange = ('A'..'Z')
