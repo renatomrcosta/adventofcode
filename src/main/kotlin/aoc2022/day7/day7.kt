@@ -12,11 +12,11 @@ private val testInput = """
     dir d
     ${'$'} cd a
     ${'$'} ls
-    dir e
+    dir a
     29116 f
     2557 g
     62596 h.lst
-    ${'$'} cd e
+    ${'$'} cd a
     ${'$'} ls
     584 i
     ${'$'} cd ..
@@ -37,7 +37,8 @@ fun main() {
 
 fun part1(input: String): Long {
     val tree = input.parseInput()
-    return tree.findAllDirSizes().filterValues { it < 100_000 }.values.sum()
+    println(tree)
+    return tree.findAllDirSizes().also { println(it) }.filter { it.second < 100_000 }.sumOf { it.second }
 }
 
 private fun String.parseInput(): NodeTree<Item> {
@@ -82,11 +83,11 @@ private fun String.parseInput(): NodeTree<Item> {
     return tree
 }
 
-private fun NodeTree<Item>.findAllDirSizes(): Map<Folder, Long> = buildMap {
+private fun NodeTree<Item>.findAllDirSizes(): List<Pair<Folder, Long>> = buildList {
     this@findAllDirSizes.preOrderTraversal { node ->
         if (node.value is Folder) {
             val size = node.calculateSize()
-            this[node.value] = size
+            add(node.value to size)
         }
     }
 }
