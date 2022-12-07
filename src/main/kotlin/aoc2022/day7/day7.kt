@@ -33,12 +33,23 @@ fun main() {
     val input = readFile("day7.txt")
     part1(testInput).run { require(this == 95437L) }
     part1(input).run { println("Part1 $this") }
+
+    part2(testInput).run { require(this == 24933642L) }
+    part2(input).run { println("Part2 $this") }
 }
 
 fun part1(input: String): Long {
     val tree = input.parseInput()
-    println(tree)
-    return tree.findAllDirSizes().also { println(it) }.filter { it.second < 100_000 }.sumOf { it.second }
+    return tree.findAllDirSizes().filter { it.second < 100_000 }.sumOf { it.second }
+}
+
+fun part2(input:String): Long{
+    val totalSpace = 70_000_000L
+    val neededSpace = 30_000_000L
+    val orderedDirSizes = input.parseInput().findAllDirSizes().sortedBy { it.second }.also { it.forEach { println(it) } }
+    val currentSpace = totalSpace - orderedDirSizes.last().second
+    val toDeleteSpace = neededSpace - currentSpace
+    return orderedDirSizes.first { it.second > toDeleteSpace }.second
 }
 
 private fun String.parseInput(): NodeTree<Item> {
