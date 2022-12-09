@@ -101,3 +101,24 @@ private fun String.parseInput() = this.splitOnLineBreaks()
     .toList()
 
 typealias Matrix = List<List<Int>>
+
+data class Direction(val xV: Int, val yV: Int)
+
+// val directions = listOf(
+//     "left" to Direction(-1, 0),
+//     "right" to Direction(+1, 0),
+//     "up" to Direction(0, -1),
+//     "down" to Direction(0, +1),
+// )
+//
+// return directions.map { (direction, vector) ->
+//     generateSequence(
+//         seedFunction = { x to y },
+//         nextFunction = { (iX, iY) -> iX + vector.xV to iY + vector.yV }
+//     )
+//         .drop(1)
+//         .takeWhile { (currentX, currentY) ->
+//             val item = matrix?.getOrNull(currentX)?.getOrNull(currentY)
+//             item != null && item < currentTreeHeight
+//         }.toList().count()
+// }.reduce { acc, score -> acc * score
