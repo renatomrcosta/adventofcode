@@ -1,7 +1,6 @@
 package aoc2022.day9
 
 import aoc2022.readFile
-import aoc2022.splitOnBlankLines
 import aoc2022.splitOnLineBreaks
 import kotlin.math.abs
 
@@ -16,31 +15,62 @@ private val testData = """
     R 2
 """.trimIndent()
 
+private val testData2 = """
+    R 5
+    U 8
+    L 8
+    D 3
+    R 17
+    D 10
+    L 25
+    U 20
+""".trimIndent()
+
 fun main() {
     val input = readFile("day9.txt")
-    part1(testData).run { require(this == 13) { "Result was $this" } }
-    part1(input).run { println("Part1: $this") }
+    // part1(testData).run { require(this == 13) { "Result was $this" } }
+    // part1(input).run { println("Part1: $this") }
+
+    // part2(testData).run { require(this == 1) { "Result was $this" } }
+    part2(testData2).run { require(this == 36) { "Result was $this" } }
+    part2(input).run { println("Part2: $this") }
 }
 
 private fun part1(input: String): Int {
     var headPosition = startingPoint
     var tailPosition = startingPoint
 
-    val tailLog = mutableMapOf<Position, Int>(startingPoint to 1)
+    val tailLog = mutableMapOf(startingPoint to Unit)
     input.parseInput().forEach { (direction, steps) ->
         repeat(steps) {
             headPosition = direction.moveHead(headPosition)
             tailPosition = direction.moveTail(headPosition, tailPosition)
-            tailLog.addTailPositionCount(tailPosition)
+            tailLog[tailPosition] = Unit
         }
     }
     return tailLog.size
 }
 
-private fun MutableMap<Position, Int>.addTailPositionCount(tailPosition: Position) {
-    if (!this.containsKey(tailPosition)) this[tailPosition] = 0
-    this[tailPosition] = this[tailPosition]?.plus(1) ?: error("aaaa")
+private fun part2(input: String): Int {
+    var headPosition = startingPoint
+    var tailPositions = (1 .. 9).map { startingPoint }
+    val lastTailLog = mutableMapOf(startingPoint to Unit)
+    input.parseInput().forEach { (direction, steps) ->
+        repeat(steps) {
+            headPosition = direction.moveHead(headPosition)
+            val newTails = mutableListOf<Position>()
+            tailPositions.forEachIndexed { index, tail ->
+                newTails.add(
+                    direction.moveTail(newTails.getOrNull(index-1) ?: headPosition, tail)
+                )
+            }
+            tailPositions = newTails
+            lastTailLog[tailPositions.last()] = Unit
+        }
+    }
+    return lastTailLog.size
 }
+
 
 private fun String.parseInput() = this.splitOnLineBreaks()
     .map {
