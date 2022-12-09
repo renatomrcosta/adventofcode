@@ -28,49 +28,37 @@ private val testData2 = """
 
 fun main() {
     val input = readFile("day9.txt")
-    // part1(testData).run { require(this == 13) { "Result was $this" } }
-    // part1(input).run { println("Part1: $this") }
+    part1(testData).run { require(this == 13) { "Result was $this" } }
+    part1(input).run { println("Part1: $this") }
 
-    // part2(testData).run { require(this == 1) { "Result was $this" } }
+    part2(testData).run { require(this == 1) { "Result was $this" } }
     part2(testData2).run { require(this == 36) { "Result was $this" } }
     part2(input).run { println("Part2: $this") }
 }
 
-private fun part1(input: String): Int {
-    var headPosition = startingPoint
-    var tailPosition = startingPoint
+private fun part1(input: String): Int = move(input, 1)
+private fun part2(input: String): Int = move(input, 9)
 
-    val tailLog = mutableMapOf(startingPoint to Unit)
-    input.parseInput().forEach { (direction, steps) ->
-        repeat(steps) {
-            headPosition = direction.moveHead(headPosition)
-            tailPosition = direction.moveTail(headPosition, tailPosition)
-            tailLog[tailPosition] = Unit
-        }
-    }
-    return tailLog.size
-}
-
-private fun part2(input: String): Int {
+private fun move(input: String, knots: Int): Int {
     var headPosition = startingPoint
-    var tailPositions = (1 .. 9).map { startingPoint }
-    val lastTailLog = mutableMapOf(startingPoint to Unit)
+    var tailPositions = (1..knots).map { startingPoint }
+    val lastTailLog = mutableSetOf(startingPoint)
+
     input.parseInput().forEach { (direction, steps) ->
         repeat(steps) {
             headPosition = direction.moveHead(headPosition)
             val newTails = mutableListOf<Position>()
             tailPositions.forEachIndexed { index, tail ->
                 newTails.add(
-                    direction.moveTail(newTails.getOrNull(index-1) ?: headPosition, tail)
+                    moveTail(newTails.getOrNull(index - 1) ?: headPosition, tail)
                 )
             }
             tailPositions = newTails
-            lastTailLog[tailPositions.last()] = Unit
+            lastTailLog.add(tailPositions.last())
         }
     }
     return lastTailLog.size
 }
-
 
 private fun String.parseInput() = this.splitOnLineBreaks()
     .map {
@@ -83,7 +71,6 @@ private fun Position.isTouching(headPosition: Position): Boolean {
     val (hx, hy) = headPosition
 
     return abs(x - hx) <= 1 && abs(y - hy) <= 1
-
 }
 
 private enum class Direction(val value: String, val vector: Position) {
@@ -97,34 +84,43 @@ private enum class Direction(val value: String, val vector: Position) {
         val (x, y) = headPosition
         return x + vx to y + vy
     }
+}
 
-    fun moveTail(headPosition: Position, tailPosition: Position): Position {
-        val (headX, headY) = headPosition
-        val (tailX, tailY) = tailPosition
-        return when {
-            tailPosition.isTouching(headPosition) -> tailPosition
+// Ugly af, don't care
+private fun moveTail(headPosition: Position, tailPosition: Position): Position {
+    val (headX, headY) = headPosition
+    val (tailX, tailY) = tailPosition
+    return when {
+        tailPosition.isTouching(headPosition) -> tailPosition
 
-            headX == tailX -> {
-                // they are in the same row, diagonal has changed
-                if(headY > tailY) {
-                    tailX  to tailY + 1
-                } else {
-                    tailX to tailY -1
-                }
+        headX == tailX -> {
+            // they are in the same row, diagonal has changed
+            if (headY > tailY) {
+                tailX to tailY + 1
+            } else {
+                tailX to tailY - 1
             }
+        }
 
-            headY == tailY -> {
-                // they are in the same col, row has changed
-                if(headX > tailX) {
-                    tailX + 1 to tailY
-                } else {
-                    tailX -1 to tailY
-                }
+        headY == tailY -> {
+            // they are in the same col, row has changed
+            if (headX > tailX) {
+                tailX + 1 to tailY
+            } else {
+                tailX - 1 to tailY
             }
+        }
 
-            else -> {
-                // move towards the diagonal
-                if(headX > tailX) { tailX + 1 } else { tailX -1 } to if(headY > tailY) { tailY + 1 } else { tailY -1 }
+        else -> {
+            // move towards the diagonal
+            if (headX > tailX) {
+                tailX + 1
+            } else {
+                tailX - 1
+            } to if (headY > tailY) {
+                tailY + 1
+            } else {
+                tailY - 1
             }
         }
     }
