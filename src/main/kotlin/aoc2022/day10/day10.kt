@@ -1,5 +1,7 @@
 package aoc2022.day10
 
+import aoc2022.prettyPrint
+import aoc2022.println
 import aoc2022.readFile
 import aoc2022.splitOnLineBreaks
 
@@ -8,13 +10,15 @@ fun main() {
     val input = readFile("day10.txt")
     part1(testData).run { require(this == 13140L) { println("Part1 error: $this") } }
     part1(input).run { println("Part1: $this") }
+
+    part2(testData)
+    part2(input)
 }
 
 private fun part1(input: String): Long {
-    val cpu = CPU()
-    val signalIndexes = listOf(20L, 60L, 100L, 140L, 180L, 220L)
+    val cpu = CPU().apply { operate(input) }
 
-    input.parse().forEach { cpu.operate(it) }
+    val signalIndexes = listOf(20L, 60L, 100L, 140L, 180L, 220L)
 
     return signalIndexes.fold(0L) { acc, index ->
         val xAtLog = cpu.stateLog[index.toInt()] ?: error("what? $index")
@@ -22,26 +26,39 @@ private fun part1(input: String): Long {
     }
 }
 
+private fun part2(input: String) {
+    val cpu = CPU().apply { operate(input) }
+    cpu.pixelLog.values.chunked(40).prettyPrint()
+}
+
 private data class CPU(
     var x: Long = 1L,
-    var cycle: Int = 1,
+    var cycle: Int = 1
 ) {
     val stateLog: MutableMap<Int, Long> = mutableMapOf(cycle to x)
+    val pixelLog: MutableMap<Int, String> = mutableMapOf()
 
-    fun operate(operation: Operation) {
-        when (operation) {
-            is Operation.ADDX, is Operation.NOOP -> {
-                (1..operation.cycleLength).forEach {
-                    stateLog[cycle] = x
+    fun operate(input: String) = input.parse().forEach(::operate)
 
-                    if (it == operation.cycleLength) {
-                        x += operation.accumulator
-                    }
+    private fun operate(operation: Operation) = when (operation) {
+        is Operation.ADDX, is Operation.NOOP -> {
+            (1..operation.cycleLength).forEach {
+                stateLog[cycle] = x
+                drawPixel()
 
-                    cycle++
+                if (it == operation.cycleLength) {
+                    x += operation.accumulator
                 }
+
+                cycle++
             }
         }
+    }
+
+    private fun drawPixel() {
+        val pixelWidth = (cycle - 1..cycle+1)
+        val row = (cycle / 40)
+        pixelLog[cycle] = if ((row * 40) + x + 1 in pixelWidth) "#" else "."
     }
 }
 

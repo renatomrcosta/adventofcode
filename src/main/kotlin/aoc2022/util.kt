@@ -10,9 +10,9 @@ internal fun String.splitOnBlankLines(): Sequence<String> =
 internal inline fun withExecutionTime(block: () -> Unit) =
     measureTimeMillis(block).run { println("Executed in ${this}ms") }
 
-internal fun prettyPrint(rules: List<List<Any>>) {
+internal fun List<List<Any?>>.prettyPrint() {
     println("$$$$$$$$$$$$$$$$$$$$$$$$")
-    rules.map { it.reduce { acc, s -> "$acc$s" } }.forEach { println(it) }
+    this.map { it.reduce { acc, s -> "$acc$s" } }.forEach { println(it) }
     println("$$$$$$$$$$$$$$$$$$$$$$$$")
 }
 
@@ -29,6 +29,7 @@ fun <T> List<List<T>>.transpose(): List<List<T?>> {
     return transposed
 }
 
+fun Any?.println() = println(this)
 
 fun kingsMoveOf(x: Int, y: Int) = buildList {
     add(x - 1 to y)
