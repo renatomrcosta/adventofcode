@@ -1,7 +1,6 @@
 package aoc2022.day10
 
 import aoc2022.prettyPrint
-import aoc2022.println
 import aoc2022.readFile
 import aoc2022.splitOnLineBreaks
 
@@ -17,8 +16,7 @@ fun main() {
 
 private fun part1(input: String): Long {
     val cpu = CPU().apply { operate(input) }
-
-    val signalIndexes = listOf(20L, 60L, 100L, 140L, 180L, 220L)
+    val signalIndexes = 20L..220L step 40
 
     return signalIndexes.fold(0L) { acc, index ->
         val xAtLog = cpu.stateLog[index.toInt()] ?: error("what? $index")
@@ -26,14 +24,14 @@ private fun part1(input: String): Long {
     }
 }
 
-private fun part2(input: String) {
-    val cpu = CPU().apply { operate(input) }
-    cpu.pixelLog.values.chunked(40).prettyPrint()
-}
+private fun part2(input: String) =
+    CPU().apply { operate(input) }
+        .pixelLog.values.chunked(40)
+        .prettyPrint()
 
 private data class CPU(
     var x: Long = 1L,
-    var cycle: Int = 1
+    var cycle: Int = 1,
 ) {
     val stateLog: MutableMap<Int, Long> = mutableMapOf(cycle to x)
     val pixelLog: MutableMap<Int, String> = mutableMapOf()
@@ -56,7 +54,7 @@ private data class CPU(
     }
 
     private fun drawPixel() {
-        val pixelWidth = (cycle - 1..cycle+1)
+        val pixelWidth = (cycle - 1..cycle + 1)
         val row = (cycle / 40)
         pixelLog[cycle] = if ((row * 40) + x + 1 in pixelWidth) "#" else "."
     }
