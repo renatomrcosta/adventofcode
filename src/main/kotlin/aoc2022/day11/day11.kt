@@ -1,8 +1,11 @@
 package aoc2022.day11
 
 fun main() {
-    part1(testInput).run { require(this == 10605L) { "Part1 error. Was $this" } }
-    part1(realMonkeys).run { println("Part1:  $this") }
+    part1(testInput()).run { require(this == 10605L) { "Part1 error. Was $this" } }
+    part1(realMonkeys()).run { println("Part1:  $this") }
+
+    part2(testInput()).run { require(this == 2713310158L) { "Part2 error. Was $this" } }
+    part2(realMonkeys()).run { println("Part2:  $this") }
 }
 
 private fun part1(input: List<Monkey>): Long {
@@ -18,7 +21,20 @@ private fun part1(input: List<Monkey>): Long {
     return input.map { it.inspectionCount }.sortedByDescending { it }.take(2).fold(1L) { acc, count -> acc * count }
 }
 
-private val testInput = listOf(
+private fun part2(input: List<Monkey>): Long {
+    // println("Start up - $input")
+    repeat(1000) {
+        input.forEach { monkey ->
+            monkey.operate(worried = true).forEach { (newMonkey, item) ->
+                input[newMonkey].items.addAll(item)
+            }
+        }
+        println("End of round $it - $input")
+    }
+    return input.map { it.inspectionCount }.sortedByDescending { it }.take(2).fold(1L) { acc, count -> acc * count }
+}
+
+private fun testInput()= listOf(
     Monkey(
         id = 0,
         items = mutableListOf(79L, 98L),
@@ -63,13 +79,13 @@ private data class Monkey(
     val decision: Long.() -> Boolean,
     val trueMonkeyIndex: Int,
     val falseMonkeyIndex: Int,
-    var inspectionCount: Int = 0,
+    var inspectionCount: Long = 0,
 ) {
 
-    fun operate(): Map<Int, MutableList<Long>> = buildMap {
+    fun operate(worried: Boolean = false): Map<Int, MutableList<Long>> = buildMap {
         items.map {
             inspectionCount++
-            val newValue = (it.inspection() / 3)
+            val newValue = if (worried) it.inspection() else (it.inspection() / 3)
             val newMonkey = newValue.decide()
             this.getOrPut(newMonkey) { mutableListOf() }.add(newValue)
         }
@@ -79,11 +95,11 @@ private data class Monkey(
     private fun Long.decide() = if (decision()) trueMonkeyIndex else falseMonkeyIndex
 
     override fun toString(): String {
-        return "[Monkey(id=$id, items=$items]"
+        return "[Monkey(id=$id, inspectionCount=$inspectionCount, items=$items]"
     }
 }
 
-private val realMonkeys = listOf(
+private fun realMonkeys() = listOf(
     Monkey(
         id = 0,
         items = mutableListOf(54L, 53L),
