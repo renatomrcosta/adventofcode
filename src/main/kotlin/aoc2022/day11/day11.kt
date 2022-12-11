@@ -9,93 +9,54 @@ fun main() {
 }
 
 private fun part1(input: List<Monkey>): Long {
-    // println("Start up - $input")
     repeat(20) {
         input.forEach { monkey ->
-            monkey.operate().forEach { (newMonkey, item) ->
+            monkey.operate { this / 3 }.forEach { (newMonkey, item) ->
                 input[newMonkey].items.addAll(item)
             }
         }
-        // println("End of round $it - $input")
     }
-    return input.map { it.inspectionCount }.sortedByDescending { it }.take(2).fold(1L) { acc, count -> acc * count }
+    return input.map { it.inspectionCount }.sortedByDescending { it }.take(2).reduce { acc, count -> acc * count }
 }
 
 private fun part2(input: List<Monkey>): Long {
-    // println("Start up - $input")
-    repeat(1000) {
+    // Turns out, if you have primes, their multiplication nabs you their LCM (Least common multiple)
+    // By doing so, we can apply a modulo division in the worry level, without affecting its functionality, and not letting it balloon to infinity
+    val mod = input.map { it.divisor }.reduce { acc, item -> acc * item }
+    repeat(10_000) {
         input.forEach { monkey ->
-            monkey.operate(worried = true).forEach { (newMonkey, item) ->
+            monkey.operate { this % mod }.forEach { (newMonkey, item) ->
                 input[newMonkey].items.addAll(item)
             }
         }
-        println("End of round $it - $input")
     }
-    return input.map { it.inspectionCount }.sortedByDescending { it }.take(2).fold(1L) { acc, count -> acc * count }
+    return input.map { it.inspectionCount }.sortedByDescending { it }.take(2).reduce { acc, count -> acc * count }
 }
-
-private fun testInput()= listOf(
-    Monkey(
-        id = 0,
-        items = mutableListOf(79L, 98L),
-        inspection = { this * 19L },
-        decision = { this % 23L == 0L },
-        trueMonkeyIndex = 2,
-        falseMonkeyIndex = 3
-    ),
-
-    Monkey(
-        id = 1,
-        items = mutableListOf(54L, 65L, 75L, 74L),
-        inspection = { this + 6 },
-        decision = { this % 19L == 0L },
-        trueMonkeyIndex = 2,
-        falseMonkeyIndex = 0
-    ),
-
-    Monkey(
-        id = 2,
-        items = mutableListOf(79L, 60L, 97L),
-        inspection = { this * this },
-        decision = { this % 13L == 0L },
-        trueMonkeyIndex = 1,
-        falseMonkeyIndex = 3
-    ),
-
-    Monkey(
-        id = 3,
-        items = mutableListOf(74L),
-        inspection = { -> this + 3 },
-        decision = { -> this % 17L == 0L },
-        trueMonkeyIndex = 0,
-        falseMonkeyIndex = 1
-    ),
-)
 
 private data class Monkey(
     val id: Int,
     val items: MutableList<Long>,
     val inspection: Long.() -> Long,
-    val decision: Long.() -> Boolean,
     val trueMonkeyIndex: Int,
     val falseMonkeyIndex: Int,
     var inspectionCount: Long = 0,
+    val divisor: Long,
 ) {
 
-    fun operate(worried: Boolean = false): Map<Int, MutableList<Long>> = buildMap {
+    fun operate(worryReducer: Long.() -> Long): Map<Int, MutableList<Long>> = buildMap {
         items.map {
             inspectionCount++
-            val newValue = if (worried) it.inspection() else (it.inspection() / 3)
+            val newValue = it.inspection().worryReducer()
             val newMonkey = newValue.decide()
             this.getOrPut(newMonkey) { mutableListOf() }.add(newValue)
         }
         items.removeAll { true }
     }
 
-    private fun Long.decide() = if (decision()) trueMonkeyIndex else falseMonkeyIndex
+    private fun Long.decide() = if (this % divisor == 0L) trueMonkeyIndex else falseMonkeyIndex
 
     override fun toString(): String {
-        return "[Monkey(id=$id, inspectionCount=$inspectionCount, items=$items]"
+        return "[Monkey(id=$id, inspectionCount=$inspectionCount]"
     }
 }
 
@@ -104,67 +65,105 @@ private fun realMonkeys() = listOf(
         id = 0,
         items = mutableListOf(54L, 53L),
         inspection = { this * 3L },
-        decision = { this % 2L == 0L },
+        divisor = 2L,
         trueMonkeyIndex = 2,
-        falseMonkeyIndex = 6
+        falseMonkeyIndex = 6,
     ),
 
     Monkey(
         id = 1,
         items = mutableListOf(95L, 88L, 75L, 81L, 91L, 67L, 65L, 84L),
         inspection = { this * 11 },
-        decision = { this % 7L == 0L },
+        divisor = 7L,
         trueMonkeyIndex = 3,
-        falseMonkeyIndex = 4
+        falseMonkeyIndex = 4,
     ),
 
     Monkey(
         id = 2,
         items = mutableListOf(76, 81, 50, 93, 96, 81, 83),
         inspection = { this + 6 },
-        decision = { this % 3L == 0L },
+        divisor = 3L,
         trueMonkeyIndex = 5,
-        falseMonkeyIndex = 1
+        falseMonkeyIndex = 1,
     ),
 
     Monkey(
         id = 3,
         items = mutableListOf(83, 85, 85, 63),
         inspection = { -> this + 4 },
-        decision = { -> this % 11L == 0L },
+        divisor = 11L,
         trueMonkeyIndex = 7,
-        falseMonkeyIndex = 4
+        falseMonkeyIndex = 4,
     ),
     Monkey(
         id = 4,
         items = mutableListOf(85, 52, 64),
         inspection = { -> this + 8 },
-        decision = { -> this % 17L == 0L },
+        divisor = 17L,
         trueMonkeyIndex = 0,
-        falseMonkeyIndex = 7
+        falseMonkeyIndex = 7,
     ),
     Monkey(
         id = 5,
         items = mutableListOf(57L),
         inspection = { -> this + 2 },
-        decision = { -> this % 5L == 0L },
+        divisor = 5L,
         trueMonkeyIndex = 1,
-        falseMonkeyIndex = 3
+        falseMonkeyIndex = 3,
     ),
     Monkey(
         id = 6,
         items = mutableListOf(60, 95, 76, 66, 91),
         inspection = { -> this * this },
-        decision = { -> this % 13L == 0L },
+        divisor = 13L,
         trueMonkeyIndex = 2,
-        falseMonkeyIndex = 5
+        falseMonkeyIndex = 5,
     ),
     Monkey(
         id = 7,
         items = mutableListOf(65, 84, 76, 72, 79, 65),
         inspection = { -> this + 5 },
-        decision = { -> this % 19L == 0L },
+        divisor = 19L,
         trueMonkeyIndex = 6,
+        falseMonkeyIndex = 0,
+    ),
+)
+
+private fun testInput() = listOf(
+    Monkey(
+        id = 0,
+        items = mutableListOf(79L, 98L),
+        inspection = { this * 19L },
+        divisor = 23L,
+        trueMonkeyIndex = 2,
+        falseMonkeyIndex = 3
+    ),
+
+    Monkey(
+        id = 1,
+        items = mutableListOf(54L, 65L, 75L, 74L),
+        inspection = { this + 6 },
+        divisor = 19L,
+        trueMonkeyIndex = 2,
         falseMonkeyIndex = 0
+    ),
+
+    Monkey(
+        id = 2,
+        items = mutableListOf(79L, 60L, 97L),
+        inspection = { this * this },
+        divisor = 13L,
+        trueMonkeyIndex = 1,
+        falseMonkeyIndex = 3
+    ),
+
+    Monkey(
+        id = 3,
+        items = mutableListOf(74L),
+        inspection = { -> this + 3 },
+        divisor = 17L,
+        trueMonkeyIndex = 0,
+        falseMonkeyIndex = 1
     ),
 )
