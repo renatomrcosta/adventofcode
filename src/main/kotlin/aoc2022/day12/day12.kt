@@ -1,10 +1,8 @@
 package aoc2022.day12
 
-import aoc2022.println
 import aoc2022.readFile
 import aoc2022.splitOnLineBreaks
-import kotlin.math.abs
-import kotlin.math.min
+import java.util.PriorityQueue
 
 private val testInput = """
     Sabqponm
@@ -21,47 +19,49 @@ fun main() {
     part1(input).run { println("Part1: $this") }
 }
 
-var minPaths = setOf<Coordinate>()
-
 private fun part1(input: String): Int {
     val (start, end, heights) = input.parse()
 
-    // heights.println()
+    val graph = Graph(
+        vertices = heights.keys.toSet(),
+        edges = heights.keys.associateWith { position ->
+            position.directional().filter { it in heights.keys }
+                .filter { heights[it]!! <= heights[position]!! + 1 }.toSet()
+        },
+    )
 
-    minPaths = setOf()
-    traverse(start = start, end = end, heights = heights)
+    println("START $start | END $end")
+    println("Edges ${graph.edges}")
 
-    return minPaths.size
+    return traverse(start, end, graph)
 }
 
-private fun traverse(
-    start: Coordinate,
-    end: Coordinate,
-    heights: Map<Coordinate, Int>,
-    stepLog: MutableSet<Coordinate> = mutableSetOf(),
-) {
-    if(minPaths.isNotEmpty() && minPaths.size <= stepLog.size) return
-    if (start == end) {
-        minPaths = stepLog.toSet()
-        println("EITA PEGA| stepcount: ${stepLog.size} $stepLog")
 
-        // println("Translate: ${stepLog.size} ${stepLog.map {
-        //     if(it == 0 to 0 || it == end) {'S'} else heightMap[heights[it]!! -1]
-        // }}")
-        return
+private fun traverse(start: Coordinate, end: Coordinate, graph: Graph<Coordinate>): Int {
+    val prioQueue = PriorityQueue<Pair<Coordinate, Int>>(compareBy { it.second })
+    val traversed = mutableListOf<Coordinate>()
+
+    prioQueue.add(start to 0)
+
+    while (prioQueue.isNotEmpty()) {
+        val (currentNode, cost) = prioQueue.poll()
+        if (currentNode !in traversed) {
+            traversed.add(currentNode)
+            val edges = graph.edges[currentNode].orEmpty()
+            if (end in edges) {
+                println("FOUND END $traversed")
+                return cost + 1
+            }
+            prioQueue.addAll(edges.map { it to cost + 1 })
+        }
     }
-    stepLog.add(start)
-    heights.filterKeys { it in start.directional() && it !in stepLog }
-        .filterValues { it in (heights[start]!!..heights[start]!!+1) }
-        .keys.sortedByDescending { (x, y) ->
-            val (ex, ey) = end
-            abs(x - ex) + abs(y - ey)
-        }
-        .take(2)
-        .forEach { next ->
-            traverse(next, end, heights, stepLog.toMutableSet())
-        }
+    error("no ending found!")
 }
+
+private data class Graph<T>(
+    val vertices: Set<T>,
+    val edges: Map<T, Set<T>>,
+)
 
 private fun Coordinate.directional(): Set<Coordinate> = let { (x, y) ->
     setOf(
@@ -94,8 +94,8 @@ private data class Input(
 
 private fun Char.toHeight(): Int = when (this) {
     'S' -> 0
-    'E' -> heightMap.size + 1
-    else -> heightMap.indexOf(this) + 1
+    'E' -> heightMap.size
+    else -> heightMap.indexOf(this)
 }
 
 private val heightMap = ('a'..'z').toList()

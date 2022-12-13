@@ -55,37 +55,3 @@ fun cartesianOf(xRange: IntProgression, yRange: IntProgression): List<Pair<Int, 
         }
     }
 }
-
-/*** Graph Implementation stolen from
- * https://www.atomiccommits.io/dijkstras-algorithm-in-kotlin
- * https://github.com/alexhwoods/alexhwoods.com/blob/master/kotlin-algorithms/src/main/kotlin/com/alexhwoods/graphs/datastructures/Graph.kt
- * Big thanks, my dude!
- */
-
-data class Graph<T> private constructor(
-    val vertices: Set<T>,
-    val edges: Map<T, Set<T>>,
-    val weights: Map<Pair<T, T>, Int>,
-) {
-    constructor(weights: Map<Pair<T, T>, Int>) : this(
-        vertices = weights.keys.toList().getUniqueValuesFromPairs(),
-        edges = weights.keys
-            .groupBy { it.first }
-            .mapValues { it.value.getUniqueValuesFromPairs { x -> x !== it.key } }
-            .withDefault { emptySet() },
-        weights = weights
-    )
-
-    companion object {
-        private fun <T> List<Pair<T, T>>.getUniqueValuesFromPairs(): Set<T> = this
-            .map { (a, b) -> listOf(a, b) }
-            .flatten()
-            .toSet()
-
-        private fun <T> List<Pair<T, T>>.getUniqueValuesFromPairs(predicate: (T) -> Boolean): Set<T> = this
-            .map { (a, b) -> listOf(a, b) }
-            .flatten()
-            .filter(predicate)
-            .toSet()
-    }
-}
