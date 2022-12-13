@@ -15,8 +15,11 @@ private val testInput = """
 fun main() {
     val input = readFile("day12.txt")
     part1(testInput).run { require(this == 31) { println("result was $this") } }
-    println("real input")
     part1(input).run { println("Part1: $this") }
+
+    println("PART2")
+    part2(testInput).run { require(this == 29) { println("result was $this") } }
+    part2(input).run { println("Part2: $this") }
 }
 
 private fun part1(input: String): Int {
@@ -36,6 +39,23 @@ private fun part1(input: String): Int {
     return traverse(start, end, graph)
 }
 
+private fun part2(input: String): Int {
+    val (_, end, heights) = input.parse()
+
+    val graph = Graph(
+        vertices = heights.keys.toSet(),
+        edges = heights.keys.associateWith { position ->
+            position.directional().filter { it in heights.keys }
+                .filter { heights[it]!! <= heights[position]!! + 1 }.toSet()
+        },
+    )
+
+    return heights.filterValues { it == 0 }.minOf {(start, _) ->
+        println("START $start | END $end")
+        traverse(start, end, graph)
+    }
+}
+
 
 private fun traverse(start: Coordinate, end: Coordinate, graph: Graph<Coordinate>): Int {
     val prioQueue = PriorityQueue<Pair<Coordinate, Int>>(compareBy { it.second })
@@ -49,13 +69,14 @@ private fun traverse(start: Coordinate, end: Coordinate, graph: Graph<Coordinate
             traversed.add(currentNode)
             val edges = graph.edges[currentNode].orEmpty()
             if (end in edges) {
-                println("FOUND END $traversed")
+                // println("FOUND END $traversed")
                 return cost + 1
             }
             prioQueue.addAll(edges.map { it to cost + 1 })
         }
     }
-    error("no ending found!")
+    println("no ending found!")
+    return Int.MAX_VALUE
 }
 
 private data class Graph<T>(
@@ -84,6 +105,7 @@ private fun String.parse(): Input {
             }
         }.toMap()
     return Input(start = startCoordinate, end = endCoordinate, heights = heightMap)
+
 }
 
 private data class Input(
