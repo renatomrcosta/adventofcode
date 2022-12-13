@@ -31,6 +31,14 @@ fun <T> List<List<T>>.transpose(): List<List<T?>> {
 
 fun Any?.println() = println(this)
 
+fun kingsMoveOf(pair: Pair<Int, Int>) = buildList {
+    val (x, y) = pair
+    add(x - 1 to y)
+    add(x + 1 to y)
+    add(x to y - 1)
+    add(x to y + 1)
+}
+
 fun kingsMoveOf(x: Int, y: Int) = buildList {
     add(x - 1 to y)
     add(x + 1 to y)
@@ -45,5 +53,39 @@ fun cartesianOf(xRange: IntProgression, yRange: IntProgression): List<Pair<Int, 
         yRange.forEach { y ->
             add(x to y)
         }
+    }
+}
+
+/*** Graph Implementation stolen from
+ * https://www.atomiccommits.io/dijkstras-algorithm-in-kotlin
+ * https://github.com/alexhwoods/alexhwoods.com/blob/master/kotlin-algorithms/src/main/kotlin/com/alexhwoods/graphs/datastructures/Graph.kt
+ * Big thanks, my dude!
+ */
+
+data class Graph<T> private constructor(
+    val vertices: Set<T>,
+    val edges: Map<T, Set<T>>,
+    val weights: Map<Pair<T, T>, Int>,
+) {
+    constructor(weights: Map<Pair<T, T>, Int>) : this(
+        vertices = weights.keys.toList().getUniqueValuesFromPairs(),
+        edges = weights.keys
+            .groupBy { it.first }
+            .mapValues { it.value.getUniqueValuesFromPairs { x -> x !== it.key } }
+            .withDefault { emptySet() },
+        weights = weights
+    )
+
+    companion object {
+        private fun <T> List<Pair<T, T>>.getUniqueValuesFromPairs(): Set<T> = this
+            .map { (a, b) -> listOf(a, b) }
+            .flatten()
+            .toSet()
+
+        private fun <T> List<Pair<T, T>>.getUniqueValuesFromPairs(predicate: (T) -> Boolean): Set<T> = this
+            .map { (a, b) -> listOf(a, b) }
+            .flatten()
+            .filter(predicate)
+            .toSet()
     }
 }
