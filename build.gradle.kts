@@ -11,9 +11,8 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    implementation("io.arrow-kt:arrow-core:1.1.2")
-    implementation("io.arrow-kt:arrow-core:1.1.3")
-    implementation("io.arrow-kt:arrow-mtl:0.11.0")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.14.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     testImplementation(kotlin("test-junit5"))
