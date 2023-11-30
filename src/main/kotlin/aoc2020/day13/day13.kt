@@ -43,7 +43,7 @@ private fun part2(busses: List<Bus>, startValue: Long = 0L): Unit =
                     println("Found ya: $iteration || With offset ${iteration + busses.last().offset}")
 
                     val duration = (System.currentTimeMillis() - startTime).toDuration(DurationUnit.MILLISECONDS)
-                    println("Took me from startup: ${duration.inSeconds}")
+                    println("Took me from startup: ${duration.inWholeSeconds}")
                     exitProcess(0)
                 }
             }
