@@ -10,9 +10,22 @@ private val testInput = """
     treb7uchet
 """.trimIndent()
 
+private val testInputPart2 = """
+    two1nine
+    eightwothree
+    abcone2threexyz
+    xtwone3four
+    4nineeightseven2
+    zoneight234
+    7pqrstsixteen
+""".trimIndent()
+
 fun main() {
-    part1(testInput).run { require(this == 142L) }
-    part1(readFile("day1.txt")).run { println("Part 1: $this") }
+//    part1(testInput).run { require(this == 142L) }
+//    part1(readFile("day1.txt")).run { println("Part 1: $this") }
+
+//    part2(testInputPart2).run { require(this == 281L) }
+    part2(readFile("day1.txt")).run { println("Part 2: $this") }
 }
 
 private fun part1(input: String): Long {
@@ -26,3 +39,34 @@ private fun part1(input: String): Long {
         .onEach { println(it) }
         .sum()
 }
+
+private fun part2(input: String): Long = input.splitOnLineBreaks()
+    .mapIndexed { idx, line ->
+        val allMatches = regex.findAll(line).map {
+            it.value.toLongDigit()
+        }.toList()
+        println("${idx + 1} - $allMatches")
+        "${allMatches.first()}${allMatches.last()}".toLong()
+    }
+//    .onEach { println(it) }
+    .sum()
+
+private val validDigits = setOf(
+    "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+)
+
+private fun String.toLongDigit() = when (this) {
+    "one" -> 1L
+    "two" -> 2L
+    "three" -> 3L
+    "four" -> 4L
+    "five" -> 5L
+    "six" -> 6L
+    "seven" -> 7L
+    "eight" -> 8L
+    "nine" -> 9L
+    else -> this.toLong()
+}
+
+private val regex = Regex("(${validDigits.joinToString("|")})")
