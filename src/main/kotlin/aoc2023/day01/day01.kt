@@ -21,10 +21,10 @@ private val testInputPart2 = """
 """.trimIndent()
 
 fun main() {
-//    part1(testInput).run { require(this == 142L) }
-//    part1(readFile("day1.txt")).run { println("Part 1: $this") }
+    part1(testInput).run { require(this == 142L) }
+    part1(readFile("day1.txt")).run { println("Part 1: $this") }
 
-//    part2(testInputPart2).run { require(this == 281L) }
+    part2(testInputPart2).run { require(this == 281L) }
     part2(readFile("day1.txt")).run { println("Part 2: $this") }
 }
 
@@ -42,13 +42,13 @@ private fun part1(input: String): Long {
 
 private fun part2(input: String): Long = input.splitOnLineBreaks()
     .mapIndexed { idx, line ->
-        val allMatches = regex.findAll(line).map {
-            it.value.toLongDigit()
-        }.toList()
-        println("${idx + 1} - $allMatches")
-        "${allMatches.first()}${allMatches.last()}".toLong()
+        println("[${idx + 1}] - $line")
+        val first = line.findAnyOf(validDigits)?.second ?: error("no string found in line $line")
+        val last = line.findLastAnyOf(validDigits)?.second ?: error("no string found in line $line")
+
+        "${first.toLongDigit()}${last.toLongDigit()}".toLong()
     }
-//    .onEach { println(it) }
+    .onEach { println(it) }
     .sum()
 
 private val validDigits = setOf(
@@ -68,5 +68,3 @@ private fun String.toLongDigit() = when (this) {
     "nine" -> 9L
     else -> this.toLong()
 }
-
-private val regex = Regex("(${validDigits.joinToString("|")})")
