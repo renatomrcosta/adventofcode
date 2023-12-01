@@ -28,28 +28,21 @@ fun main() {
     part2(readFile("day1.txt")).run { println("Part 2: $this") }
 }
 
-private fun part1(input: String): Long {
-    return input.splitOnLineBreaks()
-        .map { line ->
-            val first = line.first { it.isDigit() }
-            val last = line.last { it.isDigit() }
+private fun part1(input: String): Long = input.splitOnLineBreaks()
+    .sumOf { line ->
+        val first = line.first { it.isDigit() }
+        val last = line.last { it.isDigit() }
 
-            "$first$last".toLong()
-        }
-        .onEach { println(it) }
-        .sum()
-}
+        "$first$last".toLong()
+    }
 
 private fun part2(input: String): Long = input.splitOnLineBreaks()
-    .mapIndexed { idx, line ->
-        println("[${idx + 1}] - $line")
+    .sumOf { line ->
         val first = line.findAnyOf(validDigits)?.second ?: error("no string found in line $line")
         val last = line.findLastAnyOf(validDigits)?.second ?: error("no string found in line $line")
 
         "${first.toLongDigit()}${last.toLongDigit()}".toLong()
     }
-    .onEach { println(it) }
-    .sum()
 
 private val validDigits = setOf(
     "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
