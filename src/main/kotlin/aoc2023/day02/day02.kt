@@ -14,6 +14,9 @@ private val testInput = """
 fun main() {
     part1(testInput).run { require(this == 8L) }
     part1(readFile("day2.txt")).run { println("Part 1: $this") }
+
+    part2(testInput).run { require(this == 2286L) }
+    part2(readFile("day2.txt")).run { println("Part 2: $this") }
 }
 
 private fun part1(input: String): Long {
@@ -31,14 +34,22 @@ private fun part1(input: String): Long {
         .sum()
 }
 
+private fun part2(input: String): Long = buildGameSets(input)
+    .values
+    .sumOf { game ->
+        val maxGreen = game.maxOf { it["green"] ?: 0L }
+        val maxRed = game.maxOf { it["red"] ?: 0L }
+        val maxBlue = game.maxOf { it["blue"] ?: 0L }
+        maxGreen * maxRed * maxBlue
+    }
+
 private fun List<Map<String, Long>>.isValid(limits: Map<String, Long>): Boolean =
-    this.all {gameRound ->
+    this.all { gameRound ->
         limits.entries.all { (color, limit) ->
             val gameValue = gameRound[color] ?: 0L
             gameValue <= limit
         }
     }
-
 
 private fun buildGameSets(input: String) = input.splitOnLineBreaks()
     .map { line ->
@@ -51,9 +62,6 @@ private fun buildGameSets(input: String) = input.splitOnLineBreaks()
     }
     .toMap()
 
-/**
- * Takes a set of instructions, spits out a defined map
- */
 private fun String.buildGameMapping(): Map<String, Long> {
     return this.split(",")
         .map {
