@@ -35,6 +35,6 @@ private fun part1(input: String): Long {
                 (row to number) to (index..<index + number.length)
             }
     }.toList()
-        .also { println(it) }
+        .also { println(it) } 
     return 0L
 }
