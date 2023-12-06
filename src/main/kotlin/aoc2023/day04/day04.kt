@@ -35,22 +35,17 @@ private fun part1(input: String): Long {
 
 private fun part2(input: String): Long {
     val mappedInput = input.toListInput()
-        .associate { (index, winners, drawn) -> index to (winners to drawn) }
-        .toMutableMap()
+    val buckets = mappedInput.associate { (index, _) -> index to 1 }.toMutableMap()
 
-    val buckets = mappedInput.entries.associate { (index, _) -> index to 1 }.toMutableMap()
+    mappedInput.forEach { (index, winners, drawn) ->
+        val matches = drawn.intersect(winners.toSet()).size
 
-    mappedInput.entries
-        .forEach { (index, card) ->
-            val (winners, drawn) = card
-            val matches = drawn.intersect(winners.toSet()).size
-
-            repeat(buckets[index]!!) {
-                (index + 1..index + matches).forEach {
-                    buckets[it] = 1 + (buckets[it]!!)
-                }
+        repeat(buckets[index]!!) {
+            (index + 1..index + matches).forEach {
+                buckets[it] = 1 + (buckets[it]!!)
             }
         }
+    }
 
     return buckets.values.sum().toLong()
 }
