@@ -31,10 +31,13 @@ private fun part1(input: String): Long {
     val lines = input.splitOnLineBreaks()
     val rowValueMapIndex = lines
         .mapIndexed { row, line ->
+            // Got you, repeated number in the row motherfucker
+            var startIndex = 0
             digitRegex.split(line)
                 .filter { it.isNotEmpty() }
                 .map { number ->
-                    val index = line.indexOf(number)
+                    val index = line.indexOf(number, startIndex = startIndex)
+                    startIndex = index + number.length
                     (row to (number to index..<index + number.length))
                 }
         }.filter { it.isNotEmpty() }
@@ -61,7 +64,7 @@ private fun part1(input: String): Long {
 
     return rowValueMapIndex.mapNotNull { (rowIndex, pair) ->
         val (number, cols) = pair
-        for (col in cols) {
+        cols.forEach { col ->
             if (symbolIndices.contains(rowIndex to col)) {
                 return@mapNotNull number.toLong()
             }
