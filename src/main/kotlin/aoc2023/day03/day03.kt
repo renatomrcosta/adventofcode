@@ -21,8 +21,53 @@ fun main() {
     part1(testInput).run { require(this == 4361L) }
     part1(readFile("day3.txt")).run { println("Part 1: $this") }
 
-//    part2(testInput).run { require(this == 2286L) }
-//    part2(readFile("day2.txt")).run { println("Part 2: $this") }
+    part2(testInput).run { require(this == 467835L) }
+    part2(readFile("day3.txt")).run { println("Part 2: $this") }
+}
+
+private fun part2(input: String): Long {
+    val digitRegex = Regex("\\D+")
+
+    val lines = input.splitOnLineBreaks()
+
+    val rowValueMapIndex = lines
+        .mapIndexed { row, line ->
+            // Got you, repeated number in the row motherfucker
+            var startIndex = 0
+            digitRegex.split(line)
+                .filter { it.isNotEmpty() }
+                .map { number ->
+                    val index = line.indexOf(number, startIndex = startIndex)
+                    startIndex = index + number.length
+                    (number.toLong() to (row to index..<index + number.length))
+                }
+        }.filter { it.isNotEmpty() }
+        .toList()
+        .flatten()
+        .also { println(it) }
+
+
+    val gearIndices = lines.mapIndexed { rowIndex, row ->
+        row.mapIndexedNotNull { charIndex, char ->
+            if (char == '*') {
+                val surroundingIndices = surroundingIndices(rowIndex, charIndex)
+
+                val adjacentValues = rowValueMapIndex.filter { (_, coordinates) ->
+                    val (valueRow, valueCols) = coordinates
+                    val possibleCoordinates = valueCols.map { valueRow to it }
+                    possibleCoordinates.any { it in surroundingIndices }
+                }
+
+                if (adjacentValues.size == 2) {
+                    return@mapIndexedNotNull adjacentValues.map { it.first }.reduce { acc, l -> acc * l }
+                }
+            }
+            null
+        }
+    }.flatten()
+        .sum()
+
+    return gearIndices
 }
 
 private fun part1(input: String): Long {

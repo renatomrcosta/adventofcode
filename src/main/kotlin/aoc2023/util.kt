@@ -12,7 +12,7 @@ inline fun withExecutionTime(block: () -> Unit) =
 
 fun Any?.println() = println(this)
 
-fun surroundingIndices(x: Int, y: Int) = buildList {
+fun surroundingIndices(x: Int, y: Int) = buildSet {
     add(x - 1 to y - 1)
     add(x - 1 to y)
     add(x - 1 to y + 1)
