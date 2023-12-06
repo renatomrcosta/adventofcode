@@ -16,25 +16,43 @@ private val testInput = """
 fun main() {
     part1(testInput).run { require(this == 13L) }
     part1(readFile("day4.txt")).run { println("Part1: $this") }
+
+    part2(testInput).run { require(this == 30L) }
+    part2(readFile("day4.txt")).run { println("Part2: $this") }
 }
 
 private fun part1(input: String): Long {
-    return input.splitOnLineBreaks()
-        .map { line ->
-            val (_, numbers) = line.split(":")
-            val (winners, drawn) = numbers.split("|")
-            winners.splitNumbers() to drawn.splitNumbers()
-        }
-//        .also { println(it.toList()) }
-        .map { (winners, drawn) ->
+    return input.toListInput()
+        .map { (_, winners, drawn) ->
             when (val matches = drawn.intersect(winners.toSet()).size) {
                 0 -> 0.0
                 else -> 2.0.pow(matches - 1.0)
             }
         }
 //        .also { println(it.toList()) }
-        .sum()
-        .toLong()
+        .sum().toLong()
+}
+
+private fun part2(input: String): Long {
+    val mappedInput = input.toListInput()
+        .associate { (index, winners, drawn) -> index to (winners to drawn) }
+        .toMutableMap()
+
+    val buckets = mappedInput.entries.associate { (index, _) -> index to 1 }.toMutableMap()
+
+    mappedInput.entries
+        .forEach { (index, card) ->
+            val (winners, drawn) = card
+            val matches = drawn.intersect(winners.toSet()).size
+
+            repeat(buckets[index]!!) {
+                (index + 1..index + matches).forEach {
+                    buckets[it] = 1 + (buckets[it]!!)
+                }
+            }
+        }
+
+    return buckets.values.sum().toLong()
 }
 
 private fun String.splitNumbers() = this.splitToSequence(" ")
@@ -42,3 +60,10 @@ private fun String.splitNumbers() = this.splitToSequence(" ")
     .filter { it.isNotEmpty() }
     .map { it.toInt() }
     .toList()
+
+private fun String.toListInput() = this.splitOnLineBreaks()
+    .mapIndexed { idx, line ->
+        val (_, numbers) = line.split(":")
+        val (winners, drawn) = numbers.split("|")
+        Triple(idx + 1, winners.splitNumbers(), drawn.splitNumbers())
+    }
