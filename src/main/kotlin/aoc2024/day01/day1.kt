@@ -1,6 +1,7 @@
 package aoc2024.day01
 
 import aoc2024.splitOnLineBreaks
+import aoc2024.extractNumbers
 import aoc2024.readFile
 import kotlin.math.abs
 
@@ -16,7 +17,6 @@ private val testData = """
 private const val TEST_EXPECTED_RESULT_PART1 = 11L
 private const val TEST_EXPECTED_RESULT_PART2 = 31L
 
-private val NUM_REGEX = Regex("[0-9]+")
 
 fun String.parse(): Pair<List<Long>, List<Long>> {
     val left = mutableListOf<Long>()
@@ -24,7 +24,7 @@ fun String.parse(): Pair<List<Long>, List<Long>> {
 
     this.splitOnLineBreaks()
         .forEach { line ->
-            val (num1, num2) = NUM_REGEX.findAll(line).flatMap { it.groupValues }.toList()
+            val (num1, num2) = line.extractNumbers()
             left.add(num1.toLong())
             right.add(num2.toLong())
         }
