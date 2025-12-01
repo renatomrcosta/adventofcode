@@ -21,6 +21,16 @@ fun main() {
     part1(testData).run { require(this == 3) }
     part1(input).run { println("Part1: $this") }
 
+    part2(testData).run { require(this == 6) }
+    part2(input).run { println("Part2: $this") }
+
+}
+
+fun part2(input: String): Int {
+    val parsedInput = input.parse()
+    val safe = Safe()
+    parsedInput.forEach { safe.turn(it) }
+    return safe.clicksOnZero
 }
 
 fun part1(input: String): Int {
@@ -34,6 +44,7 @@ fun part1(input: String): Int {
 }
 
 class Safe {
+    var clicksOnZero = 0
     var currentValue = 50
     private val minValue = 0
     private val maxValue = 99
@@ -61,6 +72,9 @@ class Safe {
                     currentValue += 1
                 }
             }
+        }
+        if(currentValue == 0) {
+            clicksOnZero++
         }
     }
 }
