@@ -11,14 +11,20 @@ fun main() {
     part1(testData).run { require(this == 1227775554L) { "Invalid result $this" } }
     part1(input).run { println("Part1: $this") }
 
-//    part2(testData).run { require(this == 6) }
-//    part2(input).run { println("Part2: $this") }
-
+    part2(testData).run { require(this == 4174379265L) { "Invalid result $this" } }
+    part2(input).run { println("Part2: $this") }
 }
 
 fun part1(input: String): Long {
     val parsedInput = input.parseInput()
     val results = parsedInput.findAllRepeatingPatterns()
+
+    return results.sum()
+}
+
+fun part2(input: String): Long {
+    val parsedInput = input.parseInput()
+    val results = parsedInput.findAllRepeatingPatternsP2()
 
     return results.sum()
 }
@@ -31,6 +37,29 @@ private fun LongRange.findAllRepeatingPatterns() = this.mapNotNull {
     val l = str.take(str.length / 2)
     val r = str.drop(str.length / 2)
     if (l != r) return@mapNotNull null
+    it
+}
+
+private fun List<LongRange>.findAllRepeatingPatternsP2() = this.flatMap {
+    it.findAllRepeatingPatternsP2()
+}
+
+private fun LongRange.findAllRepeatingPatternsP2() = this.mapNotNull {
+    // Any amount of repeats at least twice
+    // chunk to the length and check if any are equal and short circuit
+    val str = it.toString()
+
+    val chunks = (1..str.length).map {
+        str.chunked(it)
+    }
+
+    val repeatedPatterns = chunks.filter { window ->
+        window.size > 1 && window.all { it == window[0] }
+    }
+    if (repeatedPatterns.isEmpty()) return@mapNotNull null
+
+    println("str: $str ")
+    println("Pattern: $repeatedPatterns ")
     it
 }
 
