@@ -11,3 +11,16 @@ inline fun withExecutionTime(block: () -> Unit) =
     measureTimeMillis(block).run { println("Executed in ${this}ms") }
 
 fun Any?.println() = println(this)
+
+
+fun adjacentIndicesOf(x: Int, y: Int) = buildSet {
+    add(x - 1 to y - 1)
+    add(x - 1 to y)
+    add(x - 1 to y + 1)
+    add(x to y - 1)
+//    add(x to y)
+    add(x to y + 1)
+    add(x + 1 to y - 1)
+    add(x + 1 to y)
+    add(x + 1 to y + 1)
+}
