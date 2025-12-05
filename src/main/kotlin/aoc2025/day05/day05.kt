@@ -20,12 +20,11 @@ private val testData = """
 
 fun main() {
     val input = readFile("day05.txt")
-    part1(testData).run { require(this == 3L) { "Invalid result $this" } }
-    part1(input).run { println("Part1: $this") }
+//    part1(testData).run { require(this == 3L) { "Invalid result $this" } }
+//    part1(input).run { println("Part1: $this") }
 
-//    part2(testData).run { require(this == 43L) { "Invalid result $this" } }
-//    part2(input).run { println("Part2: $this") }
-
+    part2(testData).run { require(this == 14L) { "Invalid result $this" } }
+    part2(input).run { println("Part2: $this") }
 }
 
 private fun part1(input: String): Long =
@@ -35,9 +34,7 @@ private fun part1(input: String): Long =
         .size.toLong()
 
 
-private fun part2(input: String): Long {
-    TODO()
-}
+private fun part2(input: String): Long = input.parseInput().countAmountOfPossibleFreshIngredientId()
 
 class Ingredients(
     val ranges: List<LongRange>,
@@ -46,6 +43,31 @@ class Ingredients(
     fun findAllFreshIngredients(): List<Long> = ingredients.filter { ingredient ->
         ranges.any { it.contains(ingredient) }
     }
+
+    fun countAmountOfPossibleFreshIngredientId(): Long {
+        var currentFirst = ranges.first().first
+        var currentLast = ranges.first().last
+        var count = 0L
+
+        fun doCount() {
+            count += currentLast - currentFirst + 1
+        }
+
+        for (range in ranges.drop(1)) {
+            if (range.first <= currentLast + 1) {
+                if (range.last > currentLast) {
+                    currentLast = range.last
+                }
+            } else {
+                doCount()
+                currentFirst = range.first
+                currentLast = range.last
+            }
+        }
+        doCount()
+        return count
+    }
+
 }
 
 private fun String.parseInput(): Ingredients {
@@ -63,7 +85,7 @@ private fun String.parseInput(): Ingredients {
         .toList()
 
     return Ingredients(
-        ranges = parsedRanges,
+        ranges = parsedRanges.sortedBy { it.first },
         ingredients = parsedIngredients
     )
 }
